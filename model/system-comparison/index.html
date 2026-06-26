@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Common System vs the SHCLA Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* SHCLA brand */
+    --forest:#14400D; --forest-2:#1B5212; --forest-deep:#0E2F08;
+    --coral:#E96459; --coral-deep:#D44E45; --coral-soft:#F4C9C4;
+    --gold:#F1C23D; --gold-deep:#D9A52A; --gold-soft:#F7E4AE;
+    --blue-soft:#B4D0E6; --teal:#3FA8B0; --pink:#E0A0AE;
+    --cream:#F6F1E4; --cream-2:#EDE6D4; --card:#FCFAF2;
+    --ink:#1B3314; --ink-soft:#4D6044; --line:#DED7C4;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--cream);color:var(--ink);
+    font-family:Nunito,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(16px,3vw,32px)}
+
+  /* ---------- HERO (brand band) ---------- */
+  .hero{background:var(--forest);border-radius:20px;padding:clamp(24px,4vw,46px);position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:240px;height:240px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, rgba(241,194,61,.16), transparent 60%);pointer-events:none}
+  .wm{display:block;height:48px;width:auto;margin-bottom:22px}
+  .hero__eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue-soft);font-weight:700;margin:0 0 12px}
+  .hero h1{font-weight:800;letter-spacing:-.015em;font-size:clamp(30px,5.2vw,52px);line-height:1.03;margin:0 0 16px;max-width:18ch;color:var(--coral)}
+  .hero h1 em{font-style:normal;color:var(--gold)}
+  .hero__lede{font-size:clamp(15px,2vw,18px);color:var(--blue-soft);max-width:62ch;margin:0 0 20px}
+  .tagline{display:inline-block;font-weight:700;font-size:clamp(15px,2vw,18px);color:#fff;
+    border-left:3px solid var(--gold);padding:2px 0 2px 14px}
+  .tagline em{color:var(--gold);font-style:normal}
+
+  .presets{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:24px 0 0}
+  .presets__lbl{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--blue-soft);font-weight:700;margin-right:4px}
+  .pbtn{font:inherit;font-size:13.5px;font-weight:700;border-radius:9px;padding:9px 15px;cursor:pointer;border:1px solid;transition:transform .14s,box-shadow .18s,background .18s}
+  .pbtn--common{background:rgba(233,100,89,.16);color:#F6B3AC;border-color:rgba(233,100,89,.5)}
+  .pbtn--common:hover{background:rgba(233,100,89,.26)}
+  .pbtn--shcla{background:rgba(107,190,126,.18);color:#A9DBB3;border-color:rgba(107,190,126,.5)}
+  .pbtn--shcla:hover{background:rgba(107,190,126,.28)}
+  .pbtn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  /* ---------- legend ---------- */
+  .legend{display:flex;flex-wrap:wrap;gap:18px;margin:22px 0 26px;font-size:12.5px;color:var(--ink-soft);font-weight:600}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend i{width:13px;height:13px;border-radius:4px;display:inline-block}
+  .legend .l-common{background:var(--coral)} .legend .l-shcla{background:var(--forest)}
+  .legend .l-crit{background:var(--gold)}
+
+  .grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:28px;align-items:start;margin-top:4px}
+  @media (max-width:920px){.grid{grid-template-columns:1fr;gap:24px}}
+
+  .rows__head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+  .rows__head h2{font-weight:800;font-size:21px;margin:0;color:var(--forest)}
+  .rows__head span{font-size:12.5px;color:var(--ink-soft)}
+  .rows{display:flex;flex-direction:column;gap:11px}
+  .row{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;border-left:4px solid var(--line);transition:border-color .2s}
+  .row.is-common{border-left-color:var(--coral)} .row.is-shcla{border-left-color:var(--forest)}
+  .row__top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+  .row__dim{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--forest)}
+  .row__crit{font-size:9px;letter-spacing:.05em;text-transform:uppercase;font-weight:800;color:#8A6A12;background:var(--gold-soft);border-radius:5px;padding:2px 6px}
+  .seg{display:inline-flex;background:var(--cream-2);border-radius:9px;padding:3px;gap:2px;flex:none}
+  .seg button{font:inherit;font-size:12.5px;font-weight:700;border:none;background:none;cursor:pointer;padding:6px 12px;border-radius:7px;transition:background .18s,color .18s,box-shadow .18s;white-space:nowrap}
+  .seg button[data-on="common"]{color:var(--coral-deep)} .seg button[data-on="shcla"]{color:var(--forest-2)}
+  .seg button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+  .seg button[data-on="common"][aria-pressed="true"]{background:var(--coral);color:#fff;box-shadow:0 1px 5px rgba(233,100,89,.4)}
+  .seg button[data-on="shcla"][aria-pressed="true"]{background:var(--forest);color:#fff;box-shadow:0 1px 5px rgba(20,64,13,.35)}
+  .row__csq{font-size:13px;line-height:1.45;display:flex;gap:8px;align-items:flex-start}
+  .row__csq .dot{flex:none;width:8px;height:8px;border-radius:99px;margin-top:5px}
+  .row.is-common .dot{background:var(--coral)} .row.is-shcla .dot{background:var(--forest)}
+  .row.is-common .row__csq{color:var(--coral-deep)} .row.is-shcla .row__csq{color:var(--ink-soft)}
+  .row.is-shcla .row__csq b{color:var(--forest)}
+
+  .diag{position:sticky;top:18px}
+  .verdict{border-radius:16px 16px 0 0;padding:16px 20px;color:#fff;transition:background .5s}
+  .verdict--door{background:linear-gradient(135deg,var(--coral-deep),var(--coral))}
+  .verdict--partial{background:linear-gradient(135deg,var(--gold-deep),var(--gold));color:#3D2E05}
+  .verdict--home{background:linear-gradient(135deg,var(--forest),var(--forest-2))}
+  .verdict__lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.9;margin:0 0 3px}
+  .verdict__h{font-weight:800;font-size:23px;margin:0 0 4px;line-height:1.1}
+  .verdict__sub{font-size:13.5px;opacity:.95;margin:0}
+
+  .stage{position:relative;overflow:hidden;background:linear-gradient(160deg,#22332A,#2B3F33);transition:background 1s}
+  .stage.home{background:linear-gradient(160deg,var(--forest),#1C4E18 60%,#236022)}
+  svg.ring{width:100%;height:280px;display:block}
+
+  .tally{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(0,0,0,.06)}
+  .tally>div{padding:13px 18px;background:var(--card)}
+  .tally>div:first-child{border-right:1px solid var(--line)}
+  .tally__n{font-weight:800;font-size:24px;line-height:1}
+  .tally__n.bad{color:var(--coral-deep)} .tally__n.good{color:var(--forest)}
+  .tally__l{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-top:3px}
+
+  .openlist{background:var(--card);border:1px solid var(--line);border-top:none;border-radius:0 0 16px 16px;padding:14px 18px 16px}
+  .openlist__t{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--ink-soft);margin:0 0 10px}
+  .openlist ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+  .openlist li{font-size:13px;line-height:1.4;display:flex;gap:9px;align-items:flex-start;color:var(--coral-deep)}
+  .openlist li .fdot{flex:none;width:7px;height:7px;border-radius:99px;background:var(--coral);margin-top:5px}
+  .openlist li.crit .fdot{background:var(--gold-deep)}
+  .openlist li .tag{font-size:9px;letter-spacing:.05em;text-transform:uppercase;font-weight:800;color:#8A6A12;background:var(--gold-soft);border-radius:4px;padding:1px 5px;margin-left:auto;flex:none;align-self:center}
+  .openlist__none{font-size:13.5px;color:var(--forest);margin:0;display:flex;gap:8px;align-items:center;font-weight:600}
+  .openlist__none::before{content:"✓";font-weight:800}
+
+  .out{margin-top:34px}
+  .out__head h2{font-weight:800;font-size:22px;margin:0;color:var(--forest)}
+  .out__head p{font-size:13px;color:var(--ink-soft);margin:4px 0 0;max-width:52ch}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+  @media (max-width:760px){.cols{grid-template-columns:1fr}}
+  .col{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px;border-top:3px solid var(--gold)}
+  .col__lvl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--coral-deep);font-weight:800;margin:0 0 3px}
+  .col__name{font-weight:800;font-size:17px;margin:0 0 13px;color:var(--forest)}
+  .col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .col li{font-size:13.5px;line-height:1.4;padding-left:24px;position:relative;color:#A6A08F;transition:color .35s}
+  .col li::before{content:"";position:absolute;left:0;top:2px;width:15px;height:15px;border-radius:99px;border:1.5px solid #CFC8B5;background:transparent;transition:all .35s}
+  .col li.on{color:var(--ink-soft)}
+  .col li.on::before{border-color:var(--forest);background:var(--forest);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.2 L4.6 9 L10 3' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:center}
+
+  .handoff{margin-top:36px;background:var(--forest);border-radius:16px;padding:clamp(20px,3vw,30px);display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between}
+  .handoff__eg{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:800;margin:0 0 6px}
+  .handoff h3{font-weight:800;font-size:clamp(19px,2.6vw,24px);margin:0 0 6px;max-width:24ch;color:#fff}
+  .handoff p{color:var(--blue-soft);font-size:14px;margin:0;max-width:52ch}
+  .handoff__btns{display:flex;flex-wrap:wrap;gap:10px}
+  .btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:700;font-size:14px;padding:11px 17px;border-radius:10px;text-decoration:none;transition:transform .14s,box-shadow .2s,background .2s}
+  .btn--p{background:var(--gold);color:#3D2E05}.btn--p:hover{background:#F6CE5E}
+  .btn--s{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5)}.btn--s:hover{background:rgba(255,255,255,.1)}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}.btn svg{width:15px;height:15px}
+
+  .foot{margin-top:26px;padding:6px 4px 0;display:flex;flex-wrap:wrap;gap:16px 22px;justify-content:space-between;align-items:center}
+  .foot__left{font-size:12.5px;color:#8B8674}
+  .obd{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
+  .obd__by{font-size:11px;letter-spacing:.05em;color:#8B8674;text-transform:uppercase;font-weight:700}
+  .obd__mark{display:inline-flex;align-items:center;gap:8px}
+  .obd__wm{font-weight:800;font-size:13px;letter-spacing:.02em;line-height:1;color:#46408F}
+  .obd__wm small{display:block;font-weight:600;font-size:9.5px;letter-spacing:.16em;color:#7C8A93;margin-top:2px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  @media (prefers-reduced-motion:reduce){*{transition-duration:.001ms !important;animation-duration:.001ms !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero">
+    <img class="wm" alt="shcla — Supportive Housing Community Land Alliance" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAACMCAYAAAANzXDRAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYcAAB2HAY/l8WUAABWPSURBVHhe7d1tbFNXmgfwP3YcO3YSO2lw0kySJpRuKEFTUlgkL0M1KULQDkOFqrBIpbN9XZgvIxpNtSyVdrarXQaJkem3pct0YFRmVTVCaPsyha1mUpUyqVBpmCmhYWmbkHjCS9LESbBJYhL2g31c++DE9+Wc6+vc5ydZJMc2Tkz973m7z1nkWOe4A0IIsSAb30AIIVZBAUgIsSwKQEKIZVEAEkIsiwKQEGJZFICEEMuiACSEWBYFICHEsigACSGWRQFICLEsCkBCiGVRABJCLIsCkBBiWRSAhBDLogAkhFgWBSAhxLIoAAkhlkUBSAixLApAQohlUQASQiyLApAQYlkUgIQQy6IAJIRYFgUgIcSyKAAJIZZFAUgIsaxFjnWOO3wjmV/A5cfbi1v4ZlWCYxdwcLybbyYmVRvYidrALgDA1Pggf3dWk2OD+OrULzQ9l8hDPcAcqS3w8E3ExJyl1Wlfq715a1fDW7s67e8kuUcBSIgCInpuztJ7+SaSYxSAhBDLogAkhFgWBSAhxLIoAAkhlkUBSAixLApAQohlUQASQiyLApAQYlkUgIQQy6IAJIRYFgUgIcSyKAAJIZZFAUgIsSwKQEKIZVEAEkIsiwKQEGJZFICEEMuiACSEWBYFICHEskx5KlyNPX5gUMDlR43djYDTDwCodaQfJDQQiyA0E8HA7QhCM1GEZiLonLyR9hgZRJwK1x7pRdvIWb45o4DLj1Z3PZB4b9j7UGP3JH/fzqkb+HR6KPme5AN2WFD86/h5GaU13x0c5PLGDyKaHBtMnskxHjqHqfFBjA18lnycEVJPhdNqoPMQBjpf55sN5yythstbjdKaVcnvWRszOfbdGShT44M5e99lM00A1tg9aPXUo7bAg1ZPA3+3YiwE26N90sLQqABs9TSg1V2PgCv+PwClUn9/M4Whs7Qa/qYfo7RG/wlpLBBvdL9jSKjkewCKeu9T3/cb3e8KOSwql3IegCz42rwr+Lt0C81E8PbNXuHn78oOwGD5Gl3/E0jVOXkDbSNncxaE7IPnb9oCZ8rRkiJNjQ9icmwQoU9fl9ZDyccAZO+93p97LqxHOHTxXWnvu2w5DcCXSpukBB+PBWF7pE9IEMgKwBq7B8HyNap7fEq0jZw1tEfoLK1GbWAn/E1b+LukmhqPH0Au+gOZTwEoO/gymRofNKw3LpLdfp/9X/lG2QIuPzrv3Szlg55Jqa0QAZcfm9zfQ+kiBz6dGuIfooreYToAXIyFcerWX5PfB1x+nKraKO3A9I1F30OTw4fOqSGM34nxdwtVG9iJZU8chMffyN8lXYGzJBm646Fz/N2aiTjYfDz0mdCfKRN/0xas2HZY98+qhqtwGi63G1VLv4/icj+u93zCP8S0DF8FFtF70qrG7kGbdwVeKm3i78opo96TgMuP9sqW5CKTaM7Saqx64X1Dex5zqQ3swqoX3jc0CHKtqfUwlm58lW8WylU4DVfhNErct1BeOoHFvjGUuG+hxH0LrsJp1D+8ERva3oLbV8U/1ZQMDUCjPujZtHlXoLN6M98sla0klnZb5JoBEvN9Rr4nNXaPlBD01q7GqhfelzbPp4WztBpLN76K2sBO/q4FxVlajaZW8b0+R8HtecPObpvlnwIAcPuqsPa51/IiBA2bA2z1NCBYvoZvzqnQTASBwff45qwyBXk82KbhqI6mfB9vs5XcPeT8+JubAIBHlhQn22YnHACA24PxcIoNujE74Uh+L1Jw7IKwxSF/0xbpPQ+99M6/mXUOkIW83vBzFNyG3TYLR8FM8mu9ouFr6DqxH8O95/m7TMOQAMwUGGaRaTEiG/b7FFRH4KiOorAxnDHkRJqdcGB2ohCzEw7EBt2YvuTjH6JaYPA93Ysi+RB+jJ4AMmsAau35uQqnhYbdXIZ7u3DmyEt8s2kYsggSLFsjbXJfr6bCMgBQtTBSX2nHiz+Nwdk4hoLqKBY55f0HxCxyzsJWEoO9YhKFDRNwNobh+v4IbInXnp0o5J+SVZPDh/ZoH9+smLd2NZZtCfLNpsWCQstChBkXQZSGn6twGkXOaTgdt1FcNIniokk4HbdRYJ+BbZHc/o+77F7cCl/D2LWv+LtMQfocYKunwbDVXq22Fav7GY0IvGzYENu1egglW67A+9RleFoGVfVGAy6/5rlANu+Ub2oDuxbEnKC/aUvG8JtrkYK1y+ztzaWx5Rm+yTSkB2Cb11wrrpnU2D14qcT8P+d8bCUxFDaG4WkZhPepy/A+dRmFjWH+YXfR+u+TL8PeTOYKj3yydOOrsNtmM4ZdtkUKo7l9VWjeuodvNgWpAdjqadDcwzBawOVX1Qs0O1tJLBmGnpZBFFRnnuvT8m+U7wHCFg7y1Yofv4Ly0gmUl06YLuzmUtGwkm8yBakBGHAu5ps0Ydf3BscuIDh2AW0jZxEcu4D2SK/Q631/3nA/35T3WM+QDZOLVg/NGYZKLYQhJLtSJR/d/7cbTB94PLevypQhKDcABfSogmMXEBh8D9uGOnBwvBsHx7vRHolf39s2chbbhjqErGZ6Wgbx4OZRvnlB4ecMWRCq+XeSeU2v0fLxd6lr3sQ36RINX0NPx1H0dBzFmSO70XViP7pO7Ed/10n+obrdU2+xAFQ7tOKx0MsmNBNB6/UOBMcu8HdlZSuJoWTLFRQ2hlHnc2Bdyr68hYz93t6nLuMH9yn/dzKq12RElRF2zWw+Ebmg0NNxFB8Gt+NSx1Fc6jiK4d7z6O86if6uk+g6sR8fBrejp+Mo/zTNKuof4ptyTloA6r1WtnPyhqrhbWgmgvaIuhJYBdWRtJ4QAKyrd6c9Jtf6w8pWdLWylcTgfDD7Ygkk95imxgcx0HkI3e0v4k/BZpz79Y+Sf5779Y8w0HmIf4oQRhdr0EvU1RVnjuzGpSzhFg1fw6VESIrgLovXfDQTaQGod0iqRWgmgoMT2XuMSIRfyZYrfDN+0KC8NyRafziGXcdDWH6gB8WvfIHiV77A8gM9WH6gB4+90Ytjn8sZotf54legZMMKaIoU3xx8KBFyd5ezmhqPF0Md6HxdShA6U4qyysJWaouc0/xdqoga/vZ3nVR1dQa7okMvM84DStsIrbdiyqJFwBsT/8c3ZxW6HQ/e0EwEF2PhjLcez3V83diLv1ydvOv2xdVJnO6dP7zvKyvEjofjG6hF2XU8hJ3HQ/jL1UmMTaZPcI9NzqJ/dBrvfTmO031RPLKkGF6XPe0xelwZncbvurL3Apc9cZBv0mxqfBB/fnM7Rr7+SPHm4JmpCYyHzuFG97u4Z2kLCpwl/EM0YRWP56N2IzTbfOz1RJObjr/tO49v+5QHD6/qwR8ICZCP/vMFvimr2ORNeKvu192L+7bvvKk2RUvrAepVY/eompxPxRZI5rrt/ubP2HU8lPG274/Kh9CiqOndnf7mJpYf6JE+NOaJHCpOjQ/iwtsvap7nY88XJbUMv14e12Ta9hSRRAx/zxzZzTcpEg1f45s0KRLwO4gkLQAHYvP3opQIlq8xXekq0XYdD+F0ojCCGpsOf21oCP688TIecnzJN2vy1alfaA4/hhU+FSH1LAwtXIXT8BVHsNg3BrdrStoWlWj4GoZ7uzTfehILHVoNnD/FN+U9acUQauweYSWn2D7Azqmh5Ne5tG5JMT54XvvwnukPx7D8QA/frNjeR/3Yu76Sb1bt429u4vE3evnmNL9/vgGPLCnG/06tw5vRrbg+W8E/RJEb3e8ICy4IKlIAAN3tL941/5gq0+u4CqdVBV5PYrU1X1U0rMTaZ1/jm1Ux23sgLQAB4O3FLZqHsfNhCyzfnYhmbDCKCsB9f7iue8h98eVlihcx5qIkAFNf5/psRTII1coWNFqIWJnO1iNNDUCtw1uzffjVEhGAbIuNWUgbAiNxVKMMNXZP4jClhmSdwbcXt2Cg9u/RWb0ZwfI1yYOFZASwKHrDDyl1BWVLDdlK2zCeLjqBN8va8LT7RNrj5jM28Jnw8EPKSrGemxIl7ltY7BvTFH4LgYg5SLORGoCfTisvMSVKpmC88NMVOPRkjak2OYuav+sflf9hnOt9Y0F4oPSXqLQN83ffZejiu3xT3nC7piwTfG5fVdqtomElGlueMW1BAz2kDoFFzgNqVbLlStpG5/5wDMfOjejqfYkYAuud/2N2PFyGQ0/W8M2qZPtZlLyGkmHxn4LNfFPeaGx5Bst0XoVhliGw21eF2sSewnjIVcJddq8hPTyzFUiV2gMMzURUV1sWqaA6cteF/3U+B/aur8TFl5dh76O5Gx73jUzxTaalZI4xdVispDdIjOH2VaGx5Rk0tjyDtc8exBP/9hE2tL2FZYlAr2vehIqGZkPCz4ykBiASJeeNWpzgFa2e+4PIgjBXIShqCHxF0N8jSqVtGL/y7rtrbvBG9ztp3xN5WOg1b92TFnYVDfnbA5dFegAicSi30ZSWfWK9QSIO9QZzgwUfCz1Rl84tZIYEYGgmgm1DHYZeH+xarXwBps7nyDrHRdRL7Q0qXWkl6vHBR5QzJACR2LPXet2YEPS0qP+w7Xi4TPj1veS73uBPKrv4u4gAdc2bKPh0MCwAobNun1IF1RFFZ2Fksnd9paIJf6Le2nuU98iJMgt1a4qRDA1AsJJV490IDL4nJQjnW/jIps7noF6gJPXlTr6J6NC8dQ/1+gQwPACZ1CBsGzkrZKU407YXtXasKuebiADUsxaneeseKQsc0fA19HedTJbIZ+XxRZbJ11tOS7ScBSATr+TcmzzbY9tQfIjcOXlD9Xyhnt4fY6Wy+Eqd7ovyTZpQ71q/ioaVwsKPnQdy5shu/M+//BAfBrej68T+ZIl8Vh6f3USVxDKTnAdgKlbQ4OB4dzIQWSi2jZxFe6R3zn2FhY1h3b0/xmxl8RcKEZVrrK7xh//AN6nW03E0GXjsLBAlFuJmaamXwsnGiqbW2N34m3U38fTflfIP0eTY56PYdTzENyeJuBQu22soJeJnyXYpXJ3PIWyv5GNv9Gqqfzgfvliry1sFp+M2bArLVAHAQJYejhkuhatr3qRr0YOVtlcaeDwRQ+9o+JqwM0ZEyOsA5LH9fI/oHMJmKw8lInTyKQAhqOwWFLy3ajW1Hk4rVe8ouA1fsfqRwIfB7aYPwA1tb+nqhZ05sltz+EHA68OEAWiqIbBe7FAhUZeZke+Iunb5kSXFwuYCawM708LP45rUFH4QWPJ9PnrDQ8/z1R6ElIme1zcrKQHIavNpuXVWb9ZVBr8/HMO+P1znm1WhLRt3+2WHuH18e9dX6l5o8tauTqvQ7CuOwO3SFtIiVjdl0zv01NPzhIDXNyspAdge7eObFKuxe9DmXYFg+Rr+LpJDVwT1AJGYqnhdR31Gf9MWNLUeBgDYbbPwFUfgKLjNP0wxPSe1qeH2aV8Euqde/2lweog8kN1MpARgplVatfRUc9Z7tq+o4d5C0h+OCa0+zUJw76N+xRV5nKXVaGo9jKUbXwUS833lpRO6wg+A7qGhUhUNzZqPtdQTngDgLtM+fG3eumdBDn8hKwBFnc8RLF+DGrv6MNM7x0RziJn9t4Kzg9VIliRLVOQ59GQNdjxchnVLilHncyT3ZO591I/fPbcSj//jb5Nzfnrm+1IZvb9t7bOvYUPbW1j77MG0W/PWPZrDUYnaldqGsHXNmxbs8BeyAhAADk50802q1dg9aK9sUTwnWOdz4Pc6V0QB4JMsB6NblcgeII9dhnjoyRp88HwDLr68DBdfXoYPnm/A3vWVeOL+GfzKuw+VtmFd8308pcPfWwJDMl5mvjntVte8CWuffW3OnpbeKyi0bKC2wrXG0gJwICamF8jmBNniCD8sZj2FvY/6cfHlZbq3wEDyBz2fiVhg0qPSNowlpX/VPeRNpXQBxKheoqxeYGpl6GwqGlZapsKM1H2A7GAi0bxPXYatRN4wtfiVL/imNCL23uXbPkCmzufAyRfvF7InUK3/mP0ZLt55gG/WTM2+OLevChva3uKbhZtrr6CIPXip4oesn08L9or6h6RXjbbUPkARPUBeYWNYavgd+3yUbyIpctELHEK58PAb7u1SHH4wsAc4V8hFR6/yTbq4fVWoa96ULJdv1ZL5UgNQxqFIWoqdqmH0hzsfHft81LBpgiGU479mdwgNPwC49NFv+aasjArBTAbOn+KbiABSAxCJXqConqAR4UcrwMoYccXNEMqxe+ZV4eGnZuibSstzRMnlay9k0gNQVC9QT6VnpfScFWw1/eEYNh3+mm8W5ss7D2D3THy/n0h6igEoXTGWIT5nR8cKiCY9ACEoBEXU+pvPYwIv0LcKdu21aF/eeQD/Pvszvlm3nkSNO62M3jPIy/UwuL/rpKkWMEQwJACROB9YawiKrPWXiYwSTVZx7PNRxSvISsgMv0yrq2rpCVC9+FVbI/V3nUTXif18c94zLACRCEEt54AUqTjiUi0KP/3YNhq9c4Iywi8avoYzR3YLCT8kigr0CPq71GL1/Iw23NuVk9c1gqEBCCBZ7Vlpufui1UPStr1Q+InD5gS1rqIPoVx4+A33duHD4HbNc35zYeXic2G497yhrz3c24UzR17imxcMwwMQKWcEZ1sdtpXEVB1wrtTH39zE8gM9FH6C9Ydj2PfHG6p6g0MoT672ihJNnnUh74PbdWI/ejqO5mRIalQvVPZ7aAY5CUAkFkbYWR9z9QZFb3thm3gff6NX8QeUqMeGxLuOh+bdL8iCT2T49XQcTZ51IduljqM485vdhi+ORMPXpIag6GkDM5N6KZxS7GyPVnd98lrfwsawsADsD8dw7NyIsG0urIqJHp/0RoRcdbJuSTH+uWUx36yKrNVchhU62LGqPHkJncgNztHEcY65/sBWNKyE21eFIl8VKuofgrvs3jmv7JiL2sUGt68KzVv/SchVHEreR7evCmufe41vViw6etVUvUpTBGAqFobrN8XwSKIskhYs9E73RWmoayIsDPvqf4JI/Wb+bsXYh/VW4s98wIehyF4jK3agtuJLfH9hfHV5vuBbqEwXgLw6nwP3lTtxX6LqS11ZIf8Q9I9Ox/8Mx3AlHKPAyxOpgVDRsDKt6nFqAdBo+HoyLPIp8HLB7auCu6wKbl8V7qlfmXwfWTmt6OjV5Pv5bd954QtE+cb0AUgIIbLkbBGEEEJyjQKQEGJZFICEEMuiACSEWBYFICHEsigACSGWRQFICLEsCkBCiGVRABJCLIsCkBBiWRSAhBDLogAkhFgWBSAhxLIoAAkhlkUBSAixLApAQohlUQASQiyLApAQYlkUgIQQy6IAJIRYFgUgIcSyKAAJIZZFAUgIsSwKQEKIZVEAEkIsiwKQEGJZFICEEMuiACSEWBYFICHEsigACSGWRQFICLGs/wdRq93AGkQPcQAAAABJRU5ErkJggg==">
+    <p class="hero__eyebrow">Supportive Housing Community Land Alliance</p>
+    <h1>Same resident. <em>Two systems.</em> Build either one to see its impact on a life.</h1>
+    <p class="hero__lede">Every housing model makes seven structural choices. Set each one to the common approach or to SHCLA's, and watch where this resident ends up. Start from the system we have now — then change your mind, one part at a time.</p>
+    <p class="tagline"><em>Homes that heal. Land that lasts.</em></p>
+
+    <div class="presets">
+      <span class="presets__lbl">Jump to:</span>
+      <button class="pbtn pbtn--common" id="setCommon">The common system</button>
+      <button class="pbtn pbtn--shcla" id="setShcla">SHCLA's model</button>
+    </div>
+  </header>
+
+  <div class="legend">
+    <span><i class="l-common"></i> Common system</span>
+    <span><i class="l-shcla"></i> SHCLA model</span>
+    <span><i class="l-crit"></i> Housing-critical mechanism</span>
+  </div>
+
+  <div class="grid">
+    <section aria-label="Structural choices">
+      <div class="rows__head"><h2>The seven mechanisms</h2><span>Tap a side to switch the system</span></div>
+      <div class="rows" id="rows"></div>
+    </section>
+
+    <section class="diag" aria-label="Outcome for this configuration">
+      <div class="verdict verdict--door" id="verdict">
+        <p class="verdict__lbl">This configuration</p>
+        <p class="verdict__h" id="vHead">The revolving door</p>
+        <p class="verdict__sub" id="vSub">Housing itself is at risk.</p>
+      </div>
+      <div class="stage" id="stage"><svg class="ring" viewBox="0 0 360 280" id="ring" aria-hidden="true"></svg></div>
+      <div class="tally">
+        <div><div class="tally__n bad" id="tFail">7</div><div class="tally__l">Failure modes open</div></div>
+        <div><div class="tally__n" id="tOut">0</div><div class="tally__l">Outcomes unlocked</div></div>
+      </div>
+      <div class="openlist" id="openlist"></div>
+    </section>
+  </div>
+
+  <section class="out" aria-label="Outcomes">
+    <div class="out__head">
+      <h2>What the choices produce</h2>
+      <p>Each outcome lights up only when the mechanisms that drive it are all set to SHCLA.</p>
+    </div>
+    <div class="cols" id="cols"></div>
+  </section>
+
+  <div class="foot">
+    <span class="foot__left">An interactive explainer of the SHCLA model</span>
+    <a class="obd" href="https://outreachbydesign.com/" target="_blank" rel="noopener" aria-label="Designed by Outreach by Design">
+      <span class="obd__by">Designed by</span>
+      <span class="obd__mark">
+        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+          <line x1="7" y1="8" x2="14" y2="6" stroke="#9A8FC4" stroke-width="1.3"/>
+          <line x1="14" y1="6" x2="19" y2="11" stroke="#9A8FC4" stroke-width="1.3"/>
+          <line x1="7" y1="8" x2="10" y2="16" stroke="#9A8FC4" stroke-width="1.3"/>
+          <line x1="10" y1="16" x2="18" y2="18" stroke="#9A8FC4" stroke-width="1.3"/>
+          <line x1="19" y1="11" x2="18" y2="18" stroke="#9A8FC4" stroke-width="1.3"/>
+          <circle cx="7" cy="8" r="3" fill="#6B4E9E"/>
+          <circle cx="14" cy="6" r="2.4" fill="#3FA8B0"/>
+          <circle cx="19" cy="11" r="2.6" fill="#E96459"/>
+          <circle cx="18" cy="18" r="2.4" fill="#F1C23D"/>
+          <circle cx="10" cy="16" r="2.2" fill="#6BBE7E"/>
+        </svg>
+        <span class="obd__wm">OUTREACH<small>BY DESIGN</small></span>
+      </span>
+    </a>
+  </div>
+  <p class="sr" id="live" aria-live="polite"></p>
+</div>
+
+<script>
+/* Seven mechanisms — terminology and "This limits" failure modes from the Theory of Change. */
+const MECH=[
+ {id:1,dim:"Permanent community ownership",critical:true,
+  common:{label:"Private landlord ownership",csq:"Subsidy leaks to private owners, and residents are displaced when the building is sold."},
+  shcla:{label:"Permanent community ownership",secures:"the land is held in trust permanently — the home can't be sold out from under residents."}},
+ {id:2,dim:"Operator stability",critical:false,
+  common:{label:"Short lease, operator carries property risk",csq:"Lease-cliff instability and the property-risk burden make operations fragile."},
+  shcla:{label:"Operator stability",secures:"a long-term lease and no property risk let the operator focus on care and invest in staff."}},
+ {id:3,dim:"Licensed congregate care",critical:true,
+  common:{label:"Visiting, scattered-site services",csq:"A mismatch between residents' needs and the thin, visiting-services model of scattered-site housing."},
+  shcla:{label:"Licensed congregate care",secures:"round-the-clock licensed care in a permanent home, with no graduation clock."}},
+ {id:4,dim:"Mutual governance",critical:false,
+  common:{label:"Top-down management",csq:"The governance opacity and powerlessness typical of conventional housing."},
+  shcla:{label:"Mutual governance",secures:"a resident council and seats on the land trust board — influence from the dinner menu to the deed."}},
+ {id:5,dim:"Community as the intervention",critical:false,
+  common:{label:"Isolated units",csq:"The isolation that scattered-site housing deepens and institutional settings enforce."},
+  shcla:{label:"Community as the intervention",secures:"peer relationships, shared meals, and purposeful days that reduce hospitalization."}},
+ {id:6,dim:"Community integration",critical:false,
+  common:{label:"Peripheral siting",csq:"Peripheral siting that turns congregate care into containment — and stigma toward residents."},
+  shcla:{label:"Community integration",secures:"a home in an established neighborhood; two-way integration with neighbors."}},
+ {id:7,dim:"Biophilic design",critical:false,
+  common:{label:"Institutional building",csq:"The institutional, stress-inducing character that reads as 'facility, not home.'"},
+  shcla:{label:"Biophilic design",secures:"natural light, greenery, and living walls that lower stress and signal home."}}
+];
+
+const OUT=[
+ {lvl:"Short to medium term",name:"Resident resilience",items:[
+   {t:"Stays housed — no eviction or expiration",needs:[1,3]},
+   {t:"Fewer crises and hospitalizations",needs:[3,5]},
+   {t:"Belonging, daily purpose, and a real say",needs:[4,5,7]}]},
+ {lvl:"Medium term",name:"Neighborhood transformation",items:[
+   {t:"Residents contribute outward",needs:[6]},
+   {t:"A permanently community-owned asset",needs:[1]},
+   {t:"Stigma declines through contact",needs:[6,7]}]},
+ {lvl:"Long term",name:"System transformation",items:[
+   {t:"Lower public spending on crisis response",needs:[3,5]},
+   {t:"A documented, replicable blueprint",needs:[1,2,3,4,5,6,7]},
+   {t:"Policy that recognizes this housing type",needs:[1,3]}]}
+];
+
+const state={}; MECH.forEach(m=>state[m.id]="common");
+const S=id=>state[id]==='shcla';
+
+const rowsEl=document.getElementById('rows');
+MECH.forEach(m=>{
+  const row=document.createElement('div'); row.className='row'; row.id='row'+m.id;
+  row.innerHTML=`
+    <div class="row__top">
+      <span class="row__dim">${m.dim}${m.critical?'<span class="row__crit">housing-critical</span>':''}</span>
+      <span class="seg" role="group" aria-label="${m.dim}">
+        <button type="button" data-on="common" data-id="${m.id}" aria-pressed="true">Common</button>
+        <button type="button" data-on="shcla" data-id="${m.id}" aria-pressed="false">SHCLA</button>
+      </span>
+    </div>
+    <div class="row__csq"><span class="dot"></span><span class="txt" id="csq${m.id}"></span></div>`;
+  rowsEl.appendChild(row);
+});
+rowsEl.querySelectorAll('.seg button').forEach(b=>{
+  b.addEventListener('click',()=>{ state[+b.dataset.id]=b.dataset.on; render(); });
+});
+
+const colsEl=document.getElementById('cols');
+OUT.forEach((c,ci)=>{
+  const col=document.createElement('div'); col.className='col';
+  col.innerHTML=`<p class="col__lvl">${c.lvl}</p><h3 class="col__name">${c.name}</h3>
+    <ul>${c.items.map((it,ii)=>`<li id="o${ci}_${ii}">${it.t}</li>`).join('')}</ul>`;
+  colsEl.appendChild(col);
+});
+
+const NS="http://www.w3.org/2000/svg", ring=document.getElementById('ring');
+const CX=180,CY=132,R=86;
+const ST=[{a:-90,l:"Street"},{a:0,l:"Crisis"},{a:90,l:"Jail"},{a:180,l:"Hospital"}];
+const POL=(d,r)=>{const t=d*Math.PI/180;return[CX+r*Math.cos(t),CY+r*Math.sin(t)]};
+let token,homeG;
+function buildRing(){
+  ring.innerHTML="";
+  const orbit=document.createElementNS(NS,"circle");
+  orbit.setAttribute("cx",CX);orbit.setAttribute("cy",CY);orbit.setAttribute("r",R);
+  orbit.setAttribute("fill","none");orbit.setAttribute("stroke","rgba(255,255,255,.10)");
+  orbit.setAttribute("stroke-width","1.5");orbit.setAttribute("stroke-dasharray","2 7");ring.appendChild(orbit);
+  for(let i=0;i<4;i++){
+    const a0=ST[i].a,a1=ST[(i+1)%4].a; let s=a0+17,e=(a1<a0?a1+360:a1)-17;
+    const p=document.createElementNS(NS,"path"); const[x0,y0]=POL(s,R),[x1,y1]=POL(e,R);
+    p.setAttribute("d",`M ${x0} ${y0} A ${R} ${R} 0 0 1 ${x1} ${y1}`);
+    p.setAttribute("fill","none");p.setAttribute("stroke","rgba(233,150,140,.45)");p.setAttribute("stroke-width","2");ring.appendChild(p);
+  }
+  ST.forEach(s=>{
+    const[x,y]=POL(s.a,R);
+    const c=document.createElementNS(NS,"circle");
+    c.setAttribute("cx",x);c.setAttribute("cy",y);c.setAttribute("r",6);
+    c.setAttribute("fill","#6B7A70");c.setAttribute("stroke","#1A241D");c.setAttribute("stroke-width","2");ring.appendChild(c);
+    const t=document.createElementNS(NS,"text");const o=POL(s.a,R+22);
+    const ox=Math.cos(s.a*Math.PI/180)*12; // push left/right labels clear of the dots
+    t.setAttribute("x",o[0]+ox);t.setAttribute("y",o[1]+4);t.setAttribute("text-anchor","middle");
+    t.setAttribute("fill","#AEBDB2");t.setAttribute("font-size","11.5");t.setAttribute("font-family","Nunito,sans-serif");
+    t.textContent=s.l;ring.appendChild(t);
+  });
+  // home + multicolor leaves (SHCLA tree palette)
+  homeG=document.createElementNS(NS,"g");homeG.setAttribute("opacity","0");homeG.setAttribute("transform",`translate(${CX},${CY})`);
+  const h=document.createElementNS(NS,"path");h.setAttribute("d","M -16 6 L 0 -11 L 16 6 L 16 19 L -16 19 Z");
+  h.setAttribute("fill","#E96459");h.setAttribute("stroke","#F7E4AE");h.setAttribute("stroke-width","1.5");h.setAttribute("stroke-linejoin","round");homeG.appendChild(h);
+  const d=document.createElementNS(NS,"rect");d.setAttribute("x","-4");d.setAttribute("y","9");d.setAttribute("width","8");d.setAttribute("height","10");d.setAttribute("rx","1.5");d.setAttribute("fill","#F7E4AE");homeG.appendChild(d);
+  const leaves=[[-26,-3,"#F1C23D"],[26,-3,"#3FA8B0"],[-31,9,"#E0A0AE"],[31,9,"#6BBE7E"]];
+  leaves.forEach(L=>{
+    const lf=document.createElementNS(NS,"path");
+    lf.setAttribute("d",`M ${L[0]} ${L[1]} Q ${L[0]*1.5} ${L[1]-14} ${L[0]*1.9} ${L[1]-6}`);
+    lf.setAttribute("fill","none");lf.setAttribute("stroke",L[2]);lf.setAttribute("stroke-width","2.4");lf.setAttribute("stroke-linecap","round");homeG.appendChild(lf);
+    const dot=document.createElementNS(NS,"circle");dot.setAttribute("cx",L[0]*1.9);dot.setAttribute("cy",L[1]-6);dot.setAttribute("r","2.8");dot.setAttribute("fill",L[2]);homeG.appendChild(dot);
+  });
+  ring.appendChild(homeG);
+  token=document.createElementNS(NS,"circle");token.setAttribute("r","6.5");token.setAttribute("cx",CX);token.setAttribute("cy",CY-R);
+  token.setAttribute("fill","#F1C23D");token.setAttribute("stroke","#F7E4AE");token.setAttribute("stroke-width","2.5");ring.appendChild(token);
+}
+
+const stage=document.getElementById('stage'),verdict=document.getElementById('verdict');
+const vHead=document.getElementById('vHead'),vSub=document.getElementById('vSub');
+const tFail=document.getElementById('tFail'),tOut=document.getElementById('tOut');
+const openlist=document.getElementById('openlist'),live=document.getElementById('live');
+let mode="door";
+
+function render(){
+  MECH.forEach(m=>{
+    const on=state[m.id], row=document.getElementById('row'+m.id);
+    row.className='row '+(on==='common'?'is-common':'is-shcla');
+    row.querySelector('[data-on="common"]').setAttribute('aria-pressed',on==='common');
+    row.querySelector('[data-on="shcla"]').setAttribute('aria-pressed',on==='shcla');
+    document.getElementById('csq'+m.id).innerHTML = on==='common'
+      ? m.common.csq : '<b>'+m.shcla.label+':</b> '+m.shcla.secures;
+  });
+
+  const openIds=MECH.filter(m=>state[m.id]==='common').map(m=>m.id);
+  const critOpen=MECH.some(m=>m.critical&&state[m.id]==='common');
+
+  let outCount=0;
+  OUT.forEach((c,ci)=>c.items.forEach((it,ii)=>{
+    const lit=it.needs.every(n=>S(n));
+    document.getElementById('o'+ci+'_'+ii).classList.toggle('on',lit); if(lit)outCount++;
+  }));
+
+  tFail.textContent=openIds.length; tFail.className='tally__n '+(openIds.length?'bad':'good');
+  tOut.textContent=outCount; tOut.className='tally__n '+(outCount?'good':'');
+
+  if(critOpen) mode="door"; else if(openIds.length>0) mode="partial"; else mode="home";
+
+  if(mode==="door"){
+    verdict.className="verdict verdict--door";
+    vHead.textContent="The revolving door";
+    vSub.textContent="Housing itself is at risk — the resident cycles: street, crisis, hospital, jail.";
+    stage.classList.remove('home');
+  }else if(mode==="partial"){
+    verdict.className="verdict verdict--partial";
+    vHead.textContent="Housed — but not yet thriving";
+    vSub.textContent="The home holds. But "+openIds.length+" mechanism"+(openIds.length>1?"s":"")+" still revert"+(openIds.length>1?"":"s")+" to the common system, so some outcomes stay locked.";
+    stage.classList.add('home');
+  }else{
+    verdict.className="verdict verdict--home";
+    vHead.textContent="A stable home, full resilience";
+    vSub.textContent="Every mechanism is in place. The outcomes reach resident, neighborhood, and system.";
+    stage.classList.add('home');
+  }
+
+  if(openIds.length===0){
+    openlist.innerHTML='<p class="openlist__t">Open failure modes</p><p class="openlist__none">No failure modes open — the structure holds whole.</p>';
+  }else{
+    const items=MECH.filter(m=>state[m.id]==='common')
+      .sort((a,b)=>(b.critical?1:0)-(a.critical?1:0))
+      .map(m=>`<li class="${m.critical?'crit':''}"><span class="fdot"></span><span>${m.common.csq}</span>${m.critical?'<span class="tag">housing</span>':''}</li>`).join('');
+    openlist.innerHTML='<p class="openlist__t">Open failure modes — why this configuration fails</p><ul>'+items+'</ul>';
+  }
+
+  speedTarget = critOpen ? (0.45+0.55*openIds.length/7) : 0;
+  homeTarget = (mode!=="door");
+  live.textContent = mode==="door"
+    ? "Revolving door. "+openIds.length+" failure modes open, housing at risk."
+    : mode==="partial"
+      ? "Housed but not thriving. "+openIds.length+" mechanisms still common; "+outCount+" of 9 outcomes unlocked."
+      : "Stable home. All mechanisms SHCLA; all outcomes unlocked.";
+}
+
+document.getElementById('setCommon').addEventListener('click',()=>{MECH.forEach(m=>state[m.id]='common');render();});
+document.getElementById('setShcla').addEventListener('click',()=>{MECH.forEach(m=>state[m.id]='shcla');render();});
+
+let angle=-90,speed=0,speedTarget=1,homeTarget=false,last=0;
+const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+function frame(ts){
+  if(!last)last=ts;const dt=Math.min(64,ts-last);last=ts;
+  speed+=(speedTarget-speed)*0.06;
+  if(speed>0.01){
+    angle+=dt*(0.02+0.11*speed)*(reduce?0:1);
+    const[x,y]=POL(angle,R);token.setAttribute("cx",x);token.setAttribute("cy",y);token.setAttribute("opacity","1");
+    homeG.setAttribute("opacity","0");
+  }else{
+    const cx=parseFloat(token.getAttribute("cx")||CX),cy=parseFloat(token.getAttribute("cy")||CY);
+    token.setAttribute("cx",cx+(CX-cx)*0.14);token.setAttribute("cy",cy+(CY-cy)*0.14);
+    token.setAttribute("opacity", homeTarget?"0":"1");
+    if(homeTarget)homeG.setAttribute("opacity","1");
+  }
+  requestAnimationFrame(frame);
+}
+buildRing();render();requestAnimationFrame(frame);
+</script>
+</body>
+</html>

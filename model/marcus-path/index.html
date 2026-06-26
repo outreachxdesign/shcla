@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marcus's Path — The SHCLA Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#14400D; --forest-2:#1C5214; --forest-deep:#0E2F08;
+    --coral:#E96459; --coral-deep:#D44E45;
+    --gold:#F1C23D; --gold-deep:#D9A52A; --gold-soft:#F7E4AE;
+    --blue:#2E6E8E; --house:#A6C4D4; --house-2:#8FB3C6; --blue-soft:#B4D0E6; --teal:#3FA8B0; --pink:#E0A0AE;
+    --cream:#F6F1E4; --cream-2:#EDE6D4; --card:#FFFFFF;
+    --ink:#1B3314; --ink-soft:#4D6044; --line:#DED7C4;
+  }
+  *{box-sizing:border-box}
+  body{font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--cream);
+    color:var(--ink);margin:0;padding:16px;display:flex;justify-content:center;min-height:100vh;-webkit-font-smoothing:antialiased}
+  .game-box{width:100%;max-width:660px;background:var(--card);border:1px solid var(--line);
+    border-radius:20px;overflow:hidden;box-shadow:0 12px 40px rgba(20,64,13,.10);align-self:flex-start}
+  .brand{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--forest);padding:16px 20px}
+  .brand__wm{height:34px;width:auto;display:block}
+  .brand__tag{font-size:12px;color:var(--gold);font-weight:700;font-style:italic}
+  @media (max-width:480px){.brand__tag{display:none}}
+  .meters{display:flex;gap:16px;padding:14px 20px;background:var(--cream-2);border-bottom:1px solid var(--line)}
+  .meters.hide{display:none}
+  .meter{flex:1}
+  .meter__t{font-size:11.5px;font-weight:800;color:var(--ink-soft);display:flex;justify-content:space-between;margin-bottom:5px}
+  .meter__t b{color:var(--forest)}
+  .bar{height:8px;border-radius:99px;background:#fff;border:1px solid var(--line);overflow:hidden}
+  .bar>i{display:block;height:100%;width:50%;border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .bar.well>i{background:linear-gradient(90deg,var(--gold),var(--coral))}
+  .bar.sec>i{background:linear-gradient(90deg,var(--teal),var(--forest-2))}
+  .screen{padding:22px 24px 26px}
+  .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);margin:0 0 4px}
+  .progress{display:flex;gap:5px;margin:0 0 14px}
+  .progress i{height:4px;flex:1;border-radius:99px;background:var(--cream-2)}
+  .progress i.on{background:var(--forest)} .progress i.cur{background:var(--coral)}
+  .art{width:100%;height:auto;display:block;border-radius:14px;margin:0 0 18px}
+  h1.title{font-size:clamp(24px,4.4vw,34px);font-weight:900;line-height:1.1;color:var(--forest);margin:0 0 6px}
+  h1.title em{font-style:normal;color:var(--coral)}
+  .scene-title{font-size:clamp(20px,3.4vw,26px);font-weight:900;color:var(--forest);margin:0 0 10px;line-height:1.12}
+  .body{font-size:15.5px;line-height:1.55;color:var(--ink-soft);margin:0 0 18px}
+  .body b{color:var(--ink)}
+  .q{font-size:13.5px;font-weight:800;color:var(--forest);margin:0 0 10px}
+  .opts{display:flex;flex-direction:column;gap:11px}
+  .opt{display:block;width:100%;text-align:left;font:inherit;cursor:pointer;background:#fff;
+    border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;transition:border-color .18s,box-shadow .18s,background .18s}
+  .opt:hover{border-color:var(--gold);box-shadow:0 3px 14px rgba(20,64,13,.07)}
+  .opt:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .opt__tag{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:2px 7px;display:inline-block;margin-bottom:7px}
+  .opt[data-side="common"] .opt__tag{background:#F4DDD6;color:var(--coral-deep)}
+  .opt[data-side="shcla"] .opt__tag{background:var(--gold-soft);color:#7A5A12}
+  .opt__txt{font-size:14px;line-height:1.45;color:var(--ink)}
+  .opt.chosen[data-side="shcla"]{border-color:var(--forest);background:#F1F6EE}
+  .opt.chosen[data-side="common"]{border-color:var(--coral);background:#FBEEEA}
+  .opt.dim{opacity:.5}
+  .fb{margin-top:16px;border-radius:13px;padding:14px 15px;font-size:14px;line-height:1.5;display:none}
+  .fb.show{display:block}
+  .fb.good{background:#EAF3E8;border:1px solid #C2DDC4;color:#235B2E}
+  .fb.bad{background:#FBE9E4;border:1px solid #F0CABE;color:#9E2B25}
+  .fb b{font-weight:800}
+  .ctrls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px}
+  .btn{font:inherit;font-weight:800;font-size:14.5px;border:none;cursor:pointer;border-radius:11px;padding:13px 20px;transition:transform .14s,box-shadow .2s,background .2s}
+  .btn--go{background:var(--forest);color:#fff}.btn--go:hover{background:var(--forest-2);box-shadow:0 6px 18px rgba(20,64,13,.25)}
+  .btn--gold{background:var(--gold);color:#3D2E05}.btn--gold:hover{background:#F6CE5E}
+  .btn--back{background:transparent;color:var(--ink-soft);border:1px solid var(--line);font-weight:700}
+  .btn--back:hover{background:var(--cream-2)}
+  .btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .btn[hidden]{display:none}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+  .btn--gold[disabled]{background:var(--gold-soft);color:#A98A2E}
+  .verdict{border-radius:14px;padding:18px 20px;color:#fff;margin:0 0 18px}
+  .verdict--door{background:linear-gradient(135deg,var(--coral-deep),var(--coral))}
+  .verdict--partial{background:linear-gradient(135deg,var(--gold-deep),var(--gold));color:#3D2E05}
+  .verdict--home{background:linear-gradient(135deg,var(--forest),var(--forest-2))}
+  .verdict__l{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.9;margin:0 0 3px}
+  .verdict__h{font-size:23px;font-weight:900;margin:0 0 6px;line-height:1.1}
+  .verdict__s{font-size:14px;line-height:1.5;opacity:.96;margin:0}
+  .levels{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
+  .lvl{border:1px solid var(--line);border-radius:13px;padding:14px 15px;background:#fff;border-left:4px solid var(--gold)}
+  .lvl__h{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--coral-deep);margin:0 0 2px}
+  .lvl__n{font-size:16px;font-weight:900;color:var(--forest);margin:0 0 9px}
+  .lvl ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+  .lvl li{font-size:13.5px;line-height:1.35;padding-left:22px;position:relative;color:#A6A08F}
+  .lvl li::before{content:"";position:absolute;left:0;top:1px;width:14px;height:14px;border-radius:99px;border:1.5px solid #CFC8B5}
+  .lvl li.on{color:var(--ink-soft)}
+  .lvl li.on::before{border-color:var(--forest);background:var(--forest) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 12 12'%3E%3Cpath d='M2 6.2 L4.6 9 L10 3' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center no-repeat}
+  .recap{border:1px solid var(--line);border-radius:13px;overflow:hidden;margin:0 0 18px}
+  .recap__row{display:flex;align-items:center;gap:10px;padding:9px 13px;border-bottom:1px solid var(--line);font-size:13px}
+  .recap__row:last-child{border-bottom:none}
+  .recap__dot{width:9px;height:9px;border-radius:99px;flex:none}
+  .recap__row.s .recap__dot{background:var(--forest)} .recap__row.c .recap__dot{background:var(--coral)}
+  .recap__m{font-weight:700;color:var(--ink);flex:1}
+  .recap__v{font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+  .recap__row.s .recap__v{color:var(--forest)} .recap__row.c .recap__v{color:var(--coral-deep)}
+  .handoff{background:var(--forest);border-radius:14px;padding:18px 20px;margin:18px 0 0}
+  .handoff p{color:var(--blue-soft);font-size:13.5px;margin:0 0 12px}
+  .handoff__btns{display:flex;flex-wrap:wrap;gap:9px}
+  .lnk{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:13.5px;text-decoration:none;padding:10px 15px;border-radius:10px}
+  .lnk--p{background:var(--gold);color:#3D2E05} .lnk--s{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45)}
+  .foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 20px;background:var(--cream-2);border-top:1px solid var(--line)}
+  .foot__l{font-size:12px;color:#8B8674}
+  .obd{display:inline-flex;align-items:center;gap:9px;text-decoration:none}
+  .obd__by{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:800;color:#8B8674}
+  .obd__wm{font-weight:900;font-size:12.5px;color:#46408F;line-height:1}
+  .obd__wm small{display:block;font-weight:700;font-size:8.5px;letter-spacing:.15em;color:#7C8A93;margin-top:1px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  @media (prefers-reduced-motion:reduce){*{transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div class="game-box">
+  <div class="brand">
+    <img class="brand__wm" alt="shcla — Supportive Housing Community Land Alliance" src="data:image/png;base64,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">
+    <span class="brand__tag">Homes that heal. Land that lasts.</span>
+  </div>
+  <div class="meters hide" id="meters">
+    <div class="meter"><div class="meter__t">Marcus's wellbeing <b id="wlbl">50%</b></div><div class="bar well"><i id="wbar"></i></div></div>
+    <div class="meter"><div class="meter__t">Housing security <b id="slbl">50%</b></div><div class="bar sec"><i id="sbar"></i></div></div>
+  </div>
+  <div class="screen" id="screen"></div>
+  <div class="foot">
+    <span class="foot__l">An interactive explainer of the SHCLA model</span>
+    <a class="obd" href="https://outreachbydesign.com/" target="_blank" rel="noopener" aria-label="Designed by Outreach by Design">
+      <span class="obd__by">Designed by</span>
+      <span style="display:inline-flex;align-items:center;gap:8px">
+        <svg width="24" height="24" viewBox="0 0 26 26" aria-hidden="true">
+          <line x1="7" y1="8" x2="14" y2="6" stroke="#9A8FC4" stroke-width="1.3"/><line x1="14" y1="6" x2="19" y2="11" stroke="#9A8FC4" stroke-width="1.3"/>
+          <line x1="7" y1="8" x2="10" y2="16" stroke="#9A8FC4" stroke-width="1.3"/><line x1="10" y1="16" x2="18" y2="18" stroke="#9A8FC4" stroke-width="1.3"/>
+          <line x1="19" y1="11" x2="18" y2="18" stroke="#9A8FC4" stroke-width="1.3"/>
+          <circle cx="7" cy="8" r="3" fill="#6B4E9E"/><circle cx="14" cy="6" r="2.4" fill="#3FA8B0"/><circle cx="19" cy="11" r="2.6" fill="#E96459"/>
+          <circle cx="18" cy="18" r="2.4" fill="#F1C23D"/><circle cx="10" cy="16" r="2.2" fill="#6BBE7E"/>
+        </svg>
+        <span class="obd__wm">OUTREACH<small>BY DESIGN</small></span>
+      </span>
+    </a>
+  </div>
+</div>
+<p class="sr" id="live" aria-live="polite"></p>
+
+<script>
+/* ============ SHCLA-style illustration kit ============ */
+const LEAVES=["#E96459","#F1C23D","#3FA8B0","#E0A0AE","#F6F1E4","#6BBE7E"];
+const SKINS=["#8D5524","#C68642","#E0AC69","#A56A3E"];
+function P(tag,a){let s='<'+tag;for(const k in a)s+=' '+k+'="'+a[k]+'"';return s+'/>';}
+
+function hills(t){return `
+  <path d="M0 ${t} Q150 ${t-16} 300 ${t} T600 ${t} L600 600 L0 600 Z" fill="#6BBE7E"/>
+  <path d="M0 ${t+26} Q170 ${t+10} 320 ${t+26} T600 ${t+24} L600 600 L0 600 Z" fill="#A9D5A0"/>
+  <path d="M0 ${t+54} Q150 ${t+40} 300 ${t+56} T600 ${t+54} L600 600 L0 600 Z" fill="#86CB90"/>
+  <path d="M0 ${t+13} Q150 ${t-3} 300 ${t+13} T600 ${t+11}" stroke="#14400D" stroke-width="1.5" fill="none" opacity=".35"/>
+  <path d="M0 ${t+40} Q150 ${t+26} 300 ${t+42} T600 ${t+40}" stroke="#F6F1E4" stroke-width="1.5" fill="none" opacity=".5"/>`;}
+
+function sun(x,y,r){r=r||17;return `<circle cx="${x}" cy="${y}" r="${r}" fill="#E96459"/><circle cx="${x-r*0.3}" cy="${y-r*0.3}" r="${r*0.5}" fill="#EE8276" opacity=".5"/>`;}
+
+function vHouse(x,y,s){s=s||1;let stripes='';for(let i=0;i<13;i++)stripes+=`<rect x="${6+i*11}" y="62" width="4" height="116" fill="#8FB3C6"/>`;
+  return `<g transform="translate(${x},${y}) scale(${s})">
+   <path d="M68 178 h26 v14 h-26 z" fill="#8FB3C6"/>
+   <rect x="0" y="62" width="150" height="118" rx="2" fill="#A6C4D4"/>${stripes}
+   <path d="M-14 66 L75 -8 L164 66 Z" fill="#A6C4D4"/>
+   <path d="M75 -8 L164 66 L122 66 Z" fill="#8FB3C6"/>
+   <rect x="22" y="6" width="13" height="34" fill="#8FB3C6"/>
+   <path d="M52 44 v-14 a8 8 0 0 1 16 0 v14 z" fill="#F3E9C0" stroke="#5E7E8C" stroke-width="1.4"/>
+   <path d="M71 40 v-18 a8 8 0 0 1 16 0 v18 z" fill="#F3E9C0" stroke="#5E7E8C" stroke-width="1.4"/>
+   <path d="M90 44 v-14 a8 8 0 0 1 16 0 v14 z" fill="#F3E9C0" stroke="#5E7E8C" stroke-width="1.4"/>
+   <path d="M20 118 v-22 a11 11 0 0 1 22 0 v22 z" fill="#F3E9C0" stroke="#5E7E8C" stroke-width="1.4"/>
+   <path d="M64 118 v-22 a11 11 0 0 1 22 0 v22 z" fill="#F3E9C0" stroke="#5E7E8C" stroke-width="1.4"/>
+   <path d="M108 180 v-34 a15 15 0 0 1 30 0 v34 z" fill="#CFE0EA" stroke="#F6F1E4" stroke-width="3"/>
+   <circle cx="131" cy="160" r="2.6" fill="#F1C23D"/>
+  </g>`;}
+
+function leafTree(x,y,s,roots){s=s||1;
+  const pos=[[-30,-30],[-12,-46],[8,-52],[26,-40],[36,-20],[-42,-12],[-22,-20],[-2,-28],[18,-24],[2,-8],[-18,2],[22,4],[-36,-30],[12,-38],[32,-10],[-8,-42],[14,-14],[-26,-6]];
+  let lv='';pos.forEach((p,i)=>{lv+=`<ellipse cx="${p[0]}" cy="${p[1]}" rx="5" ry="9" fill="${LEAVES[i%LEAVES.length]}" transform="rotate(${(i*53)%360} ${p[0]} ${p[1]})"/>`;});
+  const rt=roots===false?'':`<path d="M0 40 C-12 50 -32 52 -50 58 M0 40 C10 52 30 54 50 60 M0 40 L0 60" stroke="#7A4A1E" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  return `<g transform="translate(${x},${y}) scale(${s})">${rt}
+   <rect x="-4" y="0" width="8" height="44" rx="3" fill="#7A4A1E"/>
+   <circle cx="0" cy="11" r="2.6" fill="#E96459"/><circle cx="0" cy="23" r="2.6" fill="#3FA8B0"/><circle cx="0" cy="35" r="2.6" fill="#F1C23D"/>
+   <path d="M0 4 L-28 -16 M0 4 L26 -14 M0 0 L0 -32 M0 -6 L-14 -30 M0 -6 L18 -28" stroke="#2E6B16" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+   ${lv}</g>`;}
+
+function conifer(x,y,s){s=s||1;let tiers='';[0,16,30,42].forEach((ty,i)=>{const w=46-i*9;tiers+=`<path d="M${-w/2} ${ty+20} Q0 ${ty+6} ${w/2} ${ty+20} L0 ${ty} Z" fill="#EDE4B5" stroke="#A99A45" stroke-width="1.2"/>`;});
+  return `<g transform="translate(${x},${y}) scale(${s})"><rect x="-4" y="58" width="8" height="16" fill="#7A4A1E"/>${tiers}</g>`;}
+
+function person(x,y,skin,top,s){s=s||1;return `<g transform="translate(${x},${y}) scale(${s})">
+   <ellipse cx="0" cy="50" rx="18" ry="4" fill="rgba(0,0,0,.18)"/>
+   <path d="M-17 48 Q0 18 17 48 Z" fill="${top}"/>
+   <circle cx="0" cy="4" r="14" fill="${skin}"/>
+   <path d="M-14 2 a14 14 0 0 1 28 0 l0 -4 a14 14 0 0 0 -28 0 z" fill="rgba(0,0,0,.16)"/></g>`;}
+
+function shrub(x,y,s){s=s||1;return `<g transform="translate(${x},${y}) scale(${s})"><ellipse cx="0" cy="0" rx="20" ry="13" fill="#2E6B16"/><circle cx="-8" cy="-4" r="3" fill="#6BBE7E"/><circle cx="6" cy="-5" r="3" fill="#F1C23D"/><circle cx="0" cy="2" r="3" fill="#E0A0AE"/></g>`;}
+
+function frame(inner,vb){return `<svg class="art" viewBox="0 0 600 ${vb}" role="img" aria-hidden="true"><rect width="600" height="${vb}" fill="#14400D"/>${inner}</svg>`;}
+
+/* full hero scene (the SHCLA house + tree + sun + conifer + hills) */
+function hero(extra){extra=extra||'';return frame(`
+  ${sun(516,62,20)}
+  ${hills(252)}
+  ${conifer(512,196,1.5)}
+  ${vHouse(212,86,1.12)}
+  ${leafTree(96,200,1.55)}
+  ${extra}`,360);}
+
+const ART={
+  intro:()=>hero(),
+  m1:()=>frame(`${sun(520,46,15)}${hills(150)}${vHouse(250,28,0.86)}${leafTree(90,128,1.05)}
+     <path d="M250 196 C200 196 160 198 120 202 M350 196 C300 198 250 200 200 202" stroke="#7A4A1E" stroke-width="3" fill="none" opacity=".55" stroke-linecap="round"/>`,230),
+  m2:()=>frame(`${hills(150)}${vHouse(265,30,0.82)}${shrub(150,196,1)}
+     ${person(150,150,SKINS[0],"#3FA8B0",1.05)}
+     <g transform="translate(228,70)"><path d="M0 0 l26 0 l0 16 q0 14 -13 21 q-13 -7 -13 -21 z" fill="#F1C23D" stroke="#D9A52A" stroke-width="1.5"/><path d="M7 12 l5 6 l8 -11" stroke="#14400D" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`,230),
+  m3:()=>frame(`${hills(150)}${vHouse(300,28,0.84)}
+     ${person(150,150,SKINS[1],"#E96459",1.0)}${person(210,154,SKINS[2],"#F1C23D",0.92)}
+     <g transform="translate(120,66)"><path d="M0 8 a8 8 0 0 1 16 0 a8 8 0 0 1 16 0 q0 11 -16 20 q-16 -9 -16 -20 z" fill="#E96459"/></g>`,230),
+  m4:()=>frame(`${hills(150)}${vHouse(360,40,0.7)}
+     <rect x="150" y="172" width="150" height="10" rx="4" fill="#7A4A1E"/>
+     ${person(160,150,SKINS[2],"#F1C23D",0.92)}${person(225,146,SKINS[0],"#3FA8B0",0.98)}${person(290,150,SKINS[3],"#E0A0AE",0.92)}
+     <path d="M225 96 l0 -16 M218 88 l7 -9 l7 9" stroke="#F6F1E4" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,230),
+  m5:()=>frame(`${hills(150)}${vHouse(372,46,0.66)}
+     <rect x="150" y="166" width="160" height="12" rx="5" fill="#7A4A1E"/>
+     <ellipse cx="230" cy="166" rx="84" ry="7" fill="#8A5A28"/>
+     ${person(170,142,SKINS[1],"#E96459",0.9)}${person(230,138,SKINS[3],"#3FA8B0",0.95)}${person(290,142,SKINS[2],"#F1C23D",0.9)}
+     <circle cx="196" cy="162" r="8" fill="#F6F1E4"/><circle cx="230" cy="160" r="8" fill="#F6F1E4"/><circle cx="264" cy="162" r="8" fill="#F6F1E4"/>`,230),
+  m6:()=>frame(`${hills(150)}
+     <rect x="0" y="182" width="600" height="48" fill="#9FB0A0" opacity=".25"/>
+     ${vHouse(40,86,0.42)}${vHouse(150,84,0.46)}${conifer(252,150,0.78)}${vHouse(300,84,0.46)}${vHouse(430,86,0.42)}${conifer(540,150,0.7)}
+     <g transform="translate(200,176)"><rect x="0" y="-26" width="62" height="26" rx="6" fill="#E96459"/><rect x="6" y="-20" width="14" height="11" rx="2" fill="#B4D0E6"/><rect x="26" y="-20" width="14" height="11" rx="2" fill="#B4D0E6"/><rect x="46" y="-20" width="10" height="11" rx="2" fill="#B4D0E6"/><circle cx="15" cy="2" r="6" fill="#222"/><circle cx="47" cy="2" r="6" fill="#222"/></g>
+     ${person(360,176,SKINS[0],"#F1C23D",0.66)}${person(150,178,SKINS[2],"#3FA8B0",0.6)}`,230),
+  m7:()=>frame(`${sun(520,44,14)}${hills(150)}${vHouse(300,26,0.84)}
+     <rect x="222" y="120" width="46" height="58" rx="4" fill="#1C5214"/>
+     ${[0,1,2,3,4,5].map(i=>`<ellipse cx="${236+(i%2)*20}" cy="${134+Math.floor(i/2)*18}" rx="7" ry="11" fill="${LEAVES[i%LEAVES.length]}" transform="rotate(${i*40} ${236+(i%2)*20} ${134+Math.floor(i/2)*18})"/>`).join('')}
+     ${leafTree(120,128,1.0)}${shrub(420,196,1.1)}${shrub(470,200,0.8)}`,230),
+  resHome:()=>hero(`${person(360,300,SKINS[1],"#E96459",1.1)}`),
+  resPartial:()=>frame(`${hills(252)}${vHouse(212,86,1.12)}${leafTree(96,200,1.4)}${person(360,300,SKINS[1],"#3FA8B0",1.1)}`,360),
+  resDoor:()=>frame(`<g transform="translate(300,150)">
+     <circle r="78" fill="none" stroke="rgba(233,150,140,.45)" stroke-width="3" stroke-dasharray="5 9"/>
+     ${[0,90,180,270].map(a=>{const r=78,x=Math.cos(a*Math.PI/180)*r,y=Math.sin(a*Math.PI/180)*r;return `<circle cx="${x}" cy="${y}" r="6" fill="#6B7A70" stroke="#14400D" stroke-width="2"/>`;}).join('')}
+     <path d="M0 -78 A78 78 0 0 1 78 0" stroke="#E96459" stroke-width="3.5" fill="none"/>
+     <path d="M78 0 A78 78 0 0 1 0 78" stroke="#E96459" stroke-width="3.5" fill="none"/></g>
+     ${person(300,118,SKINS[0],"#8A949A",0.95)}
+     <text x="300" y="250" text-anchor="middle" fill="#9DB1B8" font-family="Nunito" font-weight="700" font-size="13">street · crisis · hospital · jail</text>`,300),
+};
+
+/* ============ mechanism content (ToC terms, softened language) ============ */
+const MECH=[
+ {n:1,key:"m1",critical:true,art:"m1",title:"Permanent community ownership",
+  body:"When public funding buys supportive housing through a private landlord, the investment tends to leak away when the building is sold or the lease ends. The question for Marcus's home is who holds the ground beneath it.",
+  q:"How should the land be owned?",
+  common:{label:"Private landlord",txt:"Rent the home from a private owner on a standard lease, like most supportive housing today."},
+  shcla:{label:"Community land trust",txt:"Hold the land in a community land trust for the long term, so the home is far less likely to be sold out from under its residents."},
+  good:"The home stays in community hands rather than being sold for profit, and much of the public investment is preserved rather than lost.",
+  bad:"Years later, the owner sells. Marcus is displaced with little notice — the kind of move that often begins a return to crisis."},
+ {n:2,key:"m2",critical:false,art:"m2",title:"Operator stability",
+  body:"The care operator runs Marcus's home day to day. Whether they can concentrate on care depends in part on whether they also carry the building's risks.",
+  q:"What does the care operator carry?",
+  common:{label:"Operator carries property risk",txt:"Put the operator on a short lease, responsible for repairs and maintenance out of its care budget."},
+  shcla:{label:"Operator focuses on care",txt:"Give the operator a long-term lease with much less property risk — the land trust handles most of the building."},
+  good:"More shielded from property costs and more certain of its site, the operator can invest more in staff and program instead of bracing for the next bill.",
+  bad:"A major repair drains the care budget. Staff are cut, turnover rises, and the quality of Marcus's support tends to slip."},
+ {n:3,key:"m3",critical:true,art:"m3",title:"Licensed congregate care",
+  body:"Marcus needs real support — more than a visit twice a week. The question is what kind of care the home is built to provide.",
+  q:"What care does the home provide?",
+  common:{label:"Visiting, scattered services",txt:"Place Marcus in a scattered apartment with thin, visiting services and a time limit on his stay."},
+  shcla:{label:"Licensed, around-the-clock",txt:"Provide licensed round-the-clock care — meals, medication support, crisis response — in a stable, long-term home without a fixed graduation date."},
+  good:"On-site support meets Marcus where he is and helps head off crises before they escalate, without a fixed clock telling him to leave.",
+  bad:"Help arrives late and thin. The isolation and the time limit tend to push Marcus toward the crises the model is meant to prevent."},
+ {n:4,key:"m4",critical:false,art:"m4",title:"Mutual governance",
+  body:"It's 8:30 PM and Marcus wants to walk to the corner market. How the home is governed shapes whether that's his choice to make.",
+  q:"Who sets the rules of the home?",
+  common:{label:"Top-down management",txt:"Run the home on fixed management rules — doors lock at 8:00, residents follow the schedule."},
+  shcla:{label:"Resident council + board seats",txt:"Let residents help shape daily life through a council, and hold seats on the land trust board — influence from the dinner menu to the deed."},
+  good:"Marcus and his housemates set the evening guidelines together and look out for each other. A real say tends to keep him invested in the home.",
+  bad:"Managed like a patient with little say, Marcus is more likely to disengage. The powerlessness itself can become a reason to leave."},
+ {n:5,key:"m5",critical:false,art:"m5",title:"Community as the intervention",
+  body:"Isolation doesn't just feel bad — for serious mental illness, it can accelerate the illness. What fills Marcus's days matters alongside the roof over them.",
+  q:"What is daily life like?",
+  common:{label:"Isolated units",txt:"Give Marcus a roof, but leave him largely alone in a separate unit with little shared life."},
+  shcla:{label:"Shared, purposeful days",txt:"Build community into the home — shared meals, peer relationships, and purposeful days where everyone contributes."},
+  good:"Belonging helps replace isolation. Decades of clubhouse evidence suggest this kind of community can measurably lower hospitalization.",
+  bad:"Alone behind his door, Marcus's symptoms are more likely to deepen, and isolation can pull him back toward the crisis system."},
+ {n:6,key:"m6",critical:false,art:"m6",title:"Community integration",
+  body:"Where the home sits shapes whether Marcus is part of a neighborhood or cut off from one.",
+  q:"Where is the home built?",
+  common:{label:"On the periphery",txt:"Site the home cheaply on the edge of town, away from transit, jobs, and daily life."},
+  shcla:{label:"In an established neighborhood",txt:"Build inside an established neighborhood near transit and services, with neighbors involved."},
+  good:"Marcus can take part in work and daily life, and neighbors come to know him as a contributor — contact that tends to reduce stigma.",
+  bad:"Stranded on the edge of town, Marcus is more contained than connected, and cut off from much of what aids recovery."},
+ {n:7,key:"m7",critical:false,art:"m7",title:"Biophilic design",
+  body:"The last choice is the building itself — what it feels like to wake up inside it.",
+  q:"What does the home feel like?",
+  common:{label:"Institutional interior",txt:"Keep costs down with bare, institutional finishes — the look and feel of a facility."},
+  shcla:{label:"Natural light and greenery",txt:"Design with natural light, natural materials, and living plant walls that help lower stress and signal home."},
+  good:"A calm, green space can measurably lower Marcus's stress — and tends to read more like a home than a facility, to him and his neighbors.",
+  bad:"Bare, institutional rooms tend to keep Marcus on edge, working against the stability the home is meant to build."},
+];
+
+const OUT=[
+ {lvl:"For Marcus",name:"Resident resilience",items:[
+   {t:"More likely to stay housed",needs:[1,3]},
+   {t:"Fewer crises and hospitalizations",needs:[3,5]},
+   {t:"Belonging, daily purpose, and a real say",needs:[4,5,7]}]},
+ {lvl:"For the neighborhood",name:"Neighborhood transformation",items:[
+   {t:"Marcus contributes to the neighborhood",needs:[6]},
+   {t:"A community-owned asset for the long term",needs:[1]},
+   {t:"Stigma tends to decline through contact",needs:[6,7]}]},
+ {lvl:"For the public",name:"System transformation",items:[
+   {t:"Lower public spending on crisis response",needs:[3,5]},
+   {t:"A documented, replicable blueprint",needs:[1,2,3,4,5,6,7]},
+   {t:"Policy that recognizes this housing type",needs:[1,3]}]}
+];
+
+/* ============ state ============ */
+let view="intro";
+let choice={}; MECH.forEach(m=>choice[m.n]=null);
+let well=50, sec=50;
+const S=n=>choice[n]==='shcla';
+const screen=document.getElementById('screen');
+const meters=document.getElementById('meters');
+const live=document.getElementById('live');
+
+function setMeters(show){
+  meters.classList.toggle('hide',!show);
+  document.getElementById('wbar').style.width=Math.max(0,Math.min(100,well))+'%';
+  document.getElementById('sbar').style.width=Math.max(0,Math.min(100,sec))+'%';
+  document.getElementById('wlbl').textContent=Math.round(Math.max(0,Math.min(100,well)))+'%';
+  document.getElementById('slbl').textContent=Math.round(Math.max(0,Math.min(100,sec)))+'%';
+}
+const DELTA={1:{s:22},2:{s:15},3:{w:15,s:12},4:{w:16},5:{w:18},6:{w:10,s:6},7:{w:12}};
+function recomputeMeters(){well=50;sec=50;MECH.forEach(m=>{if(choice[m.n]===null)return;const d=DELTA[m.n],sign=S(m.n)?1:-1;if(d.w)well+=sign*d.w;if(d.s)sec+=sign*d.s;});
+  well=Math.max(0,Math.min(100,well));sec=Math.max(0,Math.min(100,sec));}
+
+function progress(cur){let s='<div class="progress">';MECH.forEach(m=>{s+=`<i class="${m.n<cur?'on':m.n===cur?'cur':''}"></i>`;});return s+'</div>';}
+
+function go(v){view=v;render();try{window.scrollTo({top:0,behavior:'auto'});}catch(e){}}
+
+/* ============ render ============ */
+function render(){
+  if(view==='intro'){
+    setMeters(false);
+    screen.innerHTML=`${ART.intro()}
+      <h1 class="title">Meet Marcus. <em>Help build him a home.</em></h1>
+      <p class="body">Marcus lives with a serious mental illness. Like thousands of people in Alameda County, what he needs most is a stable, supportive home — but the system around him can be built many ways, and most ways tend to fail him.<br><br>You'll make <b>seven choices</b>, one for each part of the SHCLA model. At each step you'll see what your choice means for Marcus. Build carefully.</p>
+      <div class="ctrls"><span></span><button class="btn btn--go" data-action="go" data-view="m1">Start with Marcus →</button></div>`;
+    return;
+  }
+  if(view==='results'){renderResults();return;}
+  const m=MECH.find(x=>x.key===view);
+  recomputeMeters();setMeters(true);
+  screen.innerHTML=`${progress(m.n)}
+    <p class="eyebrow">Mechanism ${m.n} of 7</p>
+    <h2 class="scene-title">${m.title}</h2>
+    ${ART[m.art]()}
+    <p class="body">${m.body}</p>
+    <p class="q">${m.q}</p>
+    <div class="opts" id="opts">
+      <button class="opt" data-side="common" data-action="pick" data-n="${m.n}">
+        <span class="opt__tag">Common system</span><span class="opt__txt">${m.common.txt}</span></button>
+      <button class="opt" data-side="shcla" data-action="pick" data-n="${m.n}">
+        <span class="opt__tag">SHCLA model</span><span class="opt__txt">${m.shcla.txt}</span></button>
+    </div>
+    <div class="fb" id="fb"></div>
+    <div class="ctrls">
+      <button class="btn btn--back" data-action="go" data-view="${m.n===1?'intro':'m'+(m.n-1)}">Back</button>
+      <button class="btn btn--gold" id="next" ${choice[m.n]?'':'disabled'} data-action="go" data-view="${m.n===7?'results':'m'+(m.n+1)}">${m.n===7?'See where Marcus ends up →':'Next choice →'}</button>
+    </div>`;
+  if(choice[m.n])applyChoice(m.n,choice[m.n],true);
+}
+
+function pick(n,side){choice[n]=side;applyChoice(n,side,false);}
+function applyChoice(n,side,replay){
+  const m=MECH.find(x=>x.n===n);
+  document.querySelectorAll('#opts .opt').forEach(o=>{const isPick=o.dataset.side===side;
+    o.classList.toggle('chosen',isPick);o.classList.toggle('dim',!isPick);});
+  const fb=document.getElementById('fb');const good=side==='shcla';
+  fb.className='fb show '+(good?'good':'bad');
+  fb.innerHTML=`<b>${good?'SHCLA:':'The common system:'}</b> ${good?m.good:m.bad}`;
+  document.getElementById('next').disabled=false;
+  recomputeMeters();setMeters(true);
+  if(!replay)live.textContent=(good?'SHCLA choice. ':'Common choice. ')+(good?m.good:m.bad);
+}
+
+/* ============ results ============ */
+function renderResults(){
+  setMeters(false);recomputeMeters();
+  const CRIT=MECH.filter(m=>m.critical).map(m=>m.n);
+  const housed=CRIT.every(n=>S(n));const allShcla=MECH.every(m=>S(m.n));
+  const mode=!housed?'door':(!allShcla?'partial':'home');
+  const missingCrit=CRIT.filter(n=>!S(n)).map(n=>MECH.find(m=>m.n===n).title.toLowerCase());
+  const commonCount=MECH.filter(m=>!S(m.n)).length;
+  let art,vclass,vhead,vsub;
+  if(mode==='door'){art=ART.resDoor();vclass='door';vhead="Back in the revolving door";
+    vsub=`Without ${missingCrit.join(' and ')}, the home is unlikely to hold. Marcus tends to cycle back through crisis, hospital, and the street — the pattern the model exists to break.`;}
+  else if(mode==='partial'){art=ART.resPartial();vclass='partial';vhead="Housed — but not yet thriving";
+    vsub=`Marcus keeps his home. But ${commonCount} choice${commonCount>1?'s':''} stayed with the common system, so parts of his recovery and his place in the neighborhood are still out of reach.`;}
+  else{art=ART.resHome();vclass='home';vhead="Home — for the long term";
+    vsub="Every part of the structure is in place. Marcus is housed for the long term, supported, connected to his neighborhood, and part of a community that knows him.";}
+  let levels='';
+  OUT.forEach(c=>{let items='';c.items.forEach(it=>{const on=it.needs.every(n=>S(n));items+=`<li class="${on?'on':''}">${it.t}</li>`;});
+    levels+=`<div class="lvl"><p class="lvl__h">${c.lvl}</p><p class="lvl__n">${c.name}</p><ul>${items}</ul></div>`;});
+  let recap='<div class="recap">';
+  MECH.forEach(m=>{const sh=S(m.n);recap+=`<div class="recap__row ${sh?'s':'c'}"><span class="recap__dot"></span><span class="recap__m">${m.title}</span><span class="recap__v">${sh?'SHCLA':'Common'}</span></div>`;});
+  recap+='</div>';
+  screen.innerHTML=`${art}
+    <div class="verdict verdict--${vclass}"><p class="verdict__l">Where Marcus ends up</p><p class="verdict__h">${vhead}</p><p class="verdict__s">${vsub}</p></div>
+    <p class="body" style="margin-bottom:14px">Each outcome below is reached only when the choices that drive it are all set to SHCLA.</p>
+    <div class="levels">${levels}</div>
+    <p class="q">Your seven choices</p>${recap}
+    <div class="ctrls" style="margin-top:18px"><span></span><button class="btn btn--go" data-action="restart">Build Marcus's home again</button></div>`;
+  live.textContent=vhead+'. '+vsub;
+}
+
+function restart(){choice={};MECH.forEach(m=>choice[m.n]=null);well=50;sec=50;go('intro');}
+
+/* ============ delegated events (CSP-safe; no inline handlers) ============ */
+document.addEventListener('click',function(e){
+  const el=e.target.closest('[data-action]');if(!el)return;
+  const a=el.dataset.action;
+  if(a==='go')go(el.dataset.view);
+  else if(a==='pick')pick(parseInt(el.dataset.n,10),el.dataset.side);
+  else if(a==='restart')restart();
+});
+
+render();
+</script>
+</body>
+</html>

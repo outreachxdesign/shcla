@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adults in Alameda County's Homelessness System — SHCLA Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a18;
+  --ink2: #3d3d3a;
+  --ink3: #6b6b66;
+  --ink4: #9a9a94;
+  --rule: #e4e2da;
+  --bg: #fafaf7;
+  --bg2: #f2f0e8;
+  --teal: #0f6e56;
+  --teal-lt: #e1f5ee;
+  --amber: #9e6b00;
+  --amber-lt: #fdf3dc;
+  --coral: #c62828;
+  --coral-lt: #fff0ee;
+  --purple: #4a148c;
+  --purple-lt: #f3e5f5;
+  --green: #1d9e75;
+  --green-lt: #e8f5f0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); font-size: 15px; line-height: 1.7; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(250,250,247,0.96); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: center; gap: 0; padding: 0 32px; height: 52px;
+}
+nav .brand { font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--teal); margin-right: 32px; white-space: nowrap; }
+nav a { font-size: 12px; color: var(--ink3); text-decoration: none; padding: 0 12px; height: 52px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap; }
+nav a:hover { color: var(--ink); border-color: var(--ink); }
+nav a.active { color: var(--teal); border-color: var(--teal); font-weight: 500; }
+
+/* HERO */
+.hero { padding: 56px 32px 40px; max-width: 1100px; margin: 0 auto; }
+.hero-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); font-weight: 500; margin-bottom: 12px; }
+.hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(28px, 4vw, 44px); line-height: 1.15; color: var(--ink); max-width: 700px; margin-bottom: 14px; }
+.hero-sub { font-size: 15px; color: var(--ink3); max-width: 600px; margin-bottom: 40px; }
+.hero-meta { display: flex; gap: 24px; font-size: 12px; color: var(--ink4); flex-wrap: wrap; }
+.hero-meta span::before { content: '·'; margin-right: 8px; color: var(--rule); }
+.hero-meta span:first-child::before { content: none; }
+
+/* STAT BAND */
+.stat-band { background: var(--ink); padding: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px; }
+.stat-item { padding: 20px 24px; background: var(--ink); text-align: center; }
+.stat-item .num { font-family: 'DM Serif Display', serif; font-size: 32px; color: #fff; display: block; line-height: 1; margin-bottom: 6px; }
+.stat-item .lbl { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; line-height: 1.4; }
+.stat-item.accent .num { color: #5dcaa5; }
+
+/* SECTIONS */
+section { padding: 56px 32px; max-width: 1100px; margin: 0 auto; scroll-margin-top: 60px; }
+section + section { border-top: 1px solid var(--rule); }
+.section-label { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--ink4); font-weight: 600; margin-bottom: 10px; }
+h2 { font-family: 'DM Serif Display', serif; font-size: clamp(22px, 3vw, 32px); color: var(--ink); margin-bottom: 16px; line-height: 1.2; }
+h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin: 28px 0 10px; }
+p { color: var(--ink2); margin-bottom: 14px; max-width: 720px; }
+p:last-child { margin-bottom: 0; }
+
+/* TWO-COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+.two-col.wide { grid-template-columns: 3fr 2fr; }
+@media (max-width: 700px) { .two-col, .two-col.wide { grid-template-columns: 1fr; } }
+
+/* TABLES */
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 20px 0; }
+th { background: var(--bg2); text-align: left; padding: 10px 14px; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink3); border-bottom: 1px solid var(--rule); }
+td { padding: 10px 14px; border-bottom: 1px solid var(--rule); color: var(--ink2); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg2); }
+
+/* CALLOUT */
+.callout { background: var(--teal-lt); border-left: 3px solid var(--teal); padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 24px 0; }
+.callout strong { color: var(--teal); display: block; font-size: 13px; margin-bottom: 4px; }
+.callout p { color: var(--ink2); font-size: 13px; margin: 0; max-width: none; }
+.callout.amber { background: var(--amber-lt); border-color: var(--amber); }
+.callout.amber strong { color: var(--amber); }
+.callout.coral { background: var(--coral-lt); border-color: var(--coral); }
+.callout.coral strong { color: var(--coral); }
+
+/* GROUP CARDS */
+.group-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; }
+@media (max-width: 700px) { .group-grid { grid-template-columns: 1fr; } }
+.group-card { border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+.group-card .tag { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; margin-bottom: 8px; display: block; }
+.group-card .big { font-family: 'DM Serif Display', serif; font-size: 36px; line-height: 1; margin-bottom: 4px; display: block; }
+.group-card .pct { font-size: 14px; font-weight: 500; margin-bottom: 10px; display: block; }
+.group-card .desc { font-size: 12px; line-height: 1.5; }
+.group-card.ga { background: var(--green-lt); border: 1px solid #9fe1cb; }
+.group-card.ga .tag,.group-card.ga .big,.group-card.ga .pct { color: var(--teal); }
+.group-card.gb { background: #e8f4f0; border: 1px solid #9fe1cb; }
+.group-card.gb .tag,.group-card.gb .big,.group-card.gb .pct { color: #085041; }
+.group-card.gc { background: var(--bg2); border: 1px solid var(--rule); }
+.group-card.gc .tag { color: var(--ink4); }
+.group-card.gc .big,.group-card.gc .pct { color: var(--ink); }
+
+/* OUTCOME BREAKDOWN inside group C */
+.outcome-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--rule); font-size: 12px; }
+.outcome-row:last-child { border-bottom: none; }
+.outcome-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.outcome-label { flex: 1; color: var(--ink2); }
+.outcome-num { font-weight: 600; color: var(--ink); }
+
+/* CHART CONTAINERS */
+.chart-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 12px; padding: 24px; margin: 24px 0; }
+.chart-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.chart-sub { font-size: 11px; color: var(--ink4); margin-bottom: 16px; }
+.chart-note { font-size: 11px; color: var(--ink4); margin-top: 10px; }
+
+/* HORIZ BAR CHART */
+.hbar { display: flex; flex-direction: column; gap: 8px; }
+.hbar-row { display: flex; align-items: center; gap: 10px; }
+.hbar-label { font-size: 12px; color: var(--ink2); width: 180px; flex-shrink: 0; text-align: right; }
+.hbar-track { flex: 1; height: 22px; background: var(--bg2); border-radius: 4px; overflow: hidden; }
+.hbar-fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(.4,0,.2,1); display: flex; align-items: center; padding-left: 8px; }
+.hbar-val { font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; }
+.hbar-val-out { font-size: 11px; color: var(--ink3); margin-left: 6px; }
+
+/* SANKEY */
+.sankey-wrap { background: #fff; border: 1px solid var(--rule); border-radius: 12px; padding: 24px; margin: 24px 0; }
+.sk-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.skp { font-size: 12px; padding: 4px 14px; border-radius: 20px; border: 0.5px solid #ddd; background: var(--bg2); color: var(--ink3); cursor: pointer; }
+.skp.on { font-weight: 600; background: #fff; border-color: #aaa; }
+.sk-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+.skm { background: var(--bg2); border-radius: 8px; padding: 10px 12px; text-align: center; }
+.skm b { display: block; font-size: 18px; font-weight: 600; color: var(--ink); }
+.skm .pct { font-size: 11px; color: var(--ink4); font-weight: 400; margin-left: 3px; }
+.skm span { font-size: 11px; color: var(--ink3); display: block; margin-top: 2px; }
+#sk-tip, #cj-tip, #sv-tip { position: absolute; background: #fff; border: 0.5px solid #ddd; border-radius: 8px; padding: 8px 12px; font-size: 13px; pointer-events: none; white-space: nowrap; display: none; z-index: 9; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+/* SURVIVAL */
+.sv-cards { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; margin-bottom: 16px; }
+.sv-card { border-radius: 8px; padding: 12px 14px; }
+.sv-card b { display: block; font-size: 20px; font-weight: 600; }
+.sv-card span { font-size: 11px; display: block; margin-top: 2px; }
+.sv-card .sub { font-size: 11px; margin-top: 4px; }
+
+/* STORY ANGLES */
+.angle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 24px 0; }
+@media (max-width: 700px) { .angle-grid { grid-template-columns: 1fr; } }
+.angle-card { border: 1px solid var(--rule); border-radius: 12px; padding: 20px; }
+.angle-num { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink4); font-weight: 600; margin-bottom: 6px; }
+.angle-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--ink); margin-bottom: 10px; }
+.angle-card p { font-size: 13px; max-width: none; }
+
+/* FLOW PNG */
+.flow-img { width: 100%; border-radius: 12px; border: 1px solid var(--rule); display: block; }
+
+/* LEGEND */
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--ink3); margin-bottom: 10px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; display: inline-block; vertical-align: middle; }
+.legend-line { width: 24px; height: 3px; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 4px; }
+
+/* DATA NOTE */
+.data-note { background: var(--bg2); border-radius: 8px; padding: 14px 18px; font-size: 12px; color: var(--ink3); margin-top: 40px; line-height: 1.6; }
+.data-note strong { color: var(--ink); }
+
+/* SCROLL ANIMATION */
+.fade-in { opacity: 0; transform: translateY(16px); transition: opacity .5s ease, transform .5s ease; }
+.fade-in.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">SHCLA · HMIS Analysis</span>
+  <a href="#overview" class="active">Overview</a>
+  <a href="#stay">Length of Stay</a>
+  <a href="#enrollment">Enrollment Patterns</a>
+  <a href="#transitions">Program Transitions</a>
+  <a href="#journeys">Client Journeys</a>
+  <a href="#housing">Time to Housing</a>
+  <a href="#story">Story Angles</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-label">Alameda County HMIS · Adults 18–59</div>
+  <h1>Adults in Alameda County's Homelessness System</h1>
+  <p class="hero-sub">An analysis of system entry, exit, length of stay, and pathways to housing — January 2023 to April 2026.</p>
+  <div class="hero-meta">
+    <span>Prepared for SHCLA</span>
+    <span>April 2026</span>
+    <span>Source: Alameda County HMIS via UC Berkeley</span>
+  </div>
+</div>
+
+<div class="stat-band">
+  <div class="stat-item accent"><span class="num">5,222</span><span class="lbl">Unique adults</span></div>
+  <div class="stat-item"><span class="num">16,420</span><span class="lbl">Total enrollments</span></div>
+  <div class="stat-item"><span class="num">3.1</span><span class="lbl">Avg program touchpoints</span></div>
+  <div class="stat-item"><span class="num">86%</span><span class="lbl">Have a disability at intake</span></div>
+  <div class="stat-item"><span class="num">59%</span><span class="lbl">Chronically homeless at entry</span></div>
+  <div class="stat-item accent"><span class="num">12%</span><span class="lbl">Transitioned into housing</span></div>
+</div>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="section-label">Section 1</div>
+  <h2>Who Is in the System</h2>
+  <div class="two-col wide">
+    <div>
+      <p>This analysis draws on Alameda County HMIS data covering adults ages 18–59 who accessed homelessness services between January 2023 and April 2026. The dataset captures 16,420 total program enrollments across 5,222 unique individuals — including disability status, chronic homelessness designation, income, and health coverage at intake.</p>
+      <p>The profile of this population is not one of people on the edge who need a short bridge. Eighty-six percent have a documented disability. Nearly six in ten were already classified as chronically homeless the moment they entered the system. These characteristics point toward a need for long-term, wrap-around support rather than short-term crisis intervention.</p>
+      <div class="callout">
+        <strong>Key insight</strong>
+        <p>2,451 individuals (47%) are still active in the system with no exit date recorded as of April 2026. Monthly entries rose from ~470/month in early 2024 to 600–660/month by mid-2025. Demand is not stabilizing.</p>
+      </div>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>Metric</th><th>Figure</th></tr></thead>
+        <tbody>
+          <tr><td>Total unique individuals</td><td><strong>5,222</strong></td></tr>
+          <tr><td>Total program enrollments</td><td>16,420</td></tr>
+          <tr><td>Avg program touchpoints per person</td><td>3.1</td></tr>
+          <tr><td>Still active (no exit recorded)</td><td>2,451 (47%)</td></tr>
+          <tr><td>Have a disability at intake</td><td>~4,487 (86%)</td></tr>
+          <tr><td>Chronically homeless at entry</td><td>~3,072 (59%)</td></tr>
+          <tr><td>No income at intake</td><td>~1,027</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- LENGTH OF STAY -->
+<section id="stay">
+  <div class="section-label">Section 2</div>
+  <h2>How Long People Stay</h2>
+  <p>Length of stay is measured from each person's first recorded program entry to their last exit — or to April 2026 if still active. This captures the full arc of each person's journey, including all cycling between programs.</p>
+  <div class="two-col">
+    <div>
+      <div class="chart-wrap">
+        <div class="chart-title">Time in system — unique individuals</div>
+        <div class="chart-sub">From first entry to last exit (or April 2026 if still active)</div>
+        <div class="hbar" id="stay-chart"></div>
+      </div>
+    </div>
+    <div>
+      <div class="chart-wrap">
+        <div class="chart-title">Median months by program type</div>
+        <div class="chart-sub">Per individual enrollment (not total system time)</div>
+        <div class="hbar" id="prog-chart"></div>
+        <div class="chart-note">Note: Simultaneous enrollment in multiple programs is common. These figures reflect individual program duration, not total time in system. A PSH median of 15 months reflects stable occupancy, not churn.</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout amber">
+    <strong>2,569 people — nearly half — have been in the system for more than a year</strong>
+    <p>Of those, 1,353 have been involved for two years or more. These are not short-term crisis situations. They are chronic conditions being managed, incompletely, by a system built for emergencies.</p>
+  </div>
+</section>
+
+<!-- ENROLLMENT PATTERNS -->
+<section id="enrollment">
+  <div class="section-label">Section 3</div>
+  <h2>Concurrent vs. Sequential Enrollment</h2>
+  <p>The average person touches 3.1 programs. But are they moving from one to the next, or stacking multiple programs at once? The answer is mostly both.</p>
+  <div class="two-col">
+    <div>
+      <table>
+        <thead><tr><th>Pattern</th><th>Clients</th><th>Share</th></tr></thead>
+        <tbody>
+          <tr><td>Only concurrent (multiple programs at the same time)</td><td>1,099</td><td>33%</td></tr>
+          <tr><td>Only sequential (one ends, then another begins)</td><td>323</td><td>10%</td></tr>
+          <tr><td>Both patterns at different points</td><td>1,859</td><td>57%</td></tr>
+        </tbody>
+      </table>
+      <p>The dominant pattern is layered, not linear. Most people are enrolled in multiple programs simultaneously — someone in Emergency Shelter may also be enrolled in Coordinated Entry and receiving Services Only case management at the same time. The system creates layers, not clean handoffs.</p>
+    </div>
+    <div>
+      <div class="callout coral">
+        <strong>Cost implication</strong>
+        <p>Concurrent enrollment means the county is often funding multiple programs for the same person at the same time. When one person is simultaneously in Emergency Shelter, Coordinated Entry, and Services Only, the county is paying three program costs for one unhoused individual.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAM TRANSITIONS -->
+<section id="transitions">
+  <div class="section-label">Section 4</div>
+  <h2>How People Move Between Programs</h2>
+  <p>When people do move sequentially from one program to the next, the flows reveal a system cycling on itself rather than moving people toward stability. The diagram below shows sequential transitions — one program ends, another begins.</p>
+
+  <div style="margin:24px 0;">
+    <img src="alameda_program_flow.png" alt="Program flow diagram showing churn cluster on left and stable exits on right" class="flow-img">
+  </div>
+
+  <div class="sankey-wrap" style="position:relative;">
+    <div class="chart-title">Interactive transition flow</div>
+    <div class="chart-sub" style="margin-bottom:14px;">Sequential program-to-program moves · Sources on left · Destinations on right · Hover ribbons for detail</div>
+    <div class="sk-pills" id="sk-pills"></div>
+    <div class="sk-stats" id="sk-stats"></div>
+    <div style="position:relative;">
+      <svg id="sk-svg" width="100%" style="display:block; overflow:visible;"></svg>
+      <div id="sk-tip"></div>
+    </div>
+    <div style="font-size:11px;color:var(--ink4);margin-top:8px;">Node sub-labels show count and % of all transitions shown</div>
+  </div>
+
+  <div class="two-col" style="margin-top:24px;">
+    <div>
+      <h3>The churn loop</h3>
+      <p>The top two transitions alone — Services Only → Coordinated Entry (837) and back again (393) — account for 1,230 moves. These are not steps toward housing. They are the same loop, repeated.</p>
+      <table>
+        <thead><tr><th>From</th><th>To</th><th>Count</th></tr></thead>
+        <tbody>
+          <tr><td>Services only</td><td>Coordinated entry</td><td>837</td></tr>
+          <tr><td>Coordinated entry</td><td>Services only</td><td>393</td></tr>
+          <tr><td>Services only</td><td>Emergency shelter</td><td>322</td></tr>
+          <tr><td>Emergency shelter</td><td>Services only</td><td>290</td></tr>
+          <tr><td>Street outreach</td><td>Services only</td><td>267</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>The narrow exit</h3>
+      <p>Across the entire dataset, only 233 sequential transitions ended in PSH. Coordinated Entry — the program explicitly designed to connect people to permanent housing — sent 393 people back to Services Only and 159 to Emergency Shelter for every 37 it moved to PSH.</p>
+      <div class="callout">
+        <strong>The gateway doesn't open</strong>
+        <p>This is not a flow problem. It is a capacity problem. There are not enough PSH units for Coordinated Entry to do its job.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENT JOURNEYS -->
+<section id="journeys">
+  <div class="section-label">Section 5</div>
+  <h2>Client Journeys: Three Groups</h2>
+  <p>Looking beyond transitions to individual clients reveals three distinct populations in the data. Each tells a different story about the system's effectiveness.</p>
+
+  <div class="group-grid">
+    <div class="group-card ga">
+      <span class="tag">Group A</span>
+      <span class="big">635</span>
+      <span class="pct">12.2% of all clients</span>
+      <div class="desc">Entered the system through a non-housing program and later transitioned into PSH or Rapid Re-Housing. These are the clients who successfully navigated the system to reach stable housing.</div>
+    </div>
+    <div class="group-card gb">
+      <span class="tag">Group B</span>
+      <span class="big">678</span>
+      <span class="pct">13.0% of all clients</span>
+      <div class="desc">Were already in PSH or RRH as their first recorded enrollment — stably housed when the dataset begins. 61% are still in PH with no exit recorded. Only 3% returned to homelessness after exiting PH.</div>
+    </div>
+    <div class="group-card gc">
+      <span class="tag">Group C</span>
+      <span class="big">3,909</span>
+      <span class="pct">74.9% of all clients</span>
+      <div class="desc">Never reached PSH or RRH during the observation window. Of these, 3,081 exited the system entirely without a housing placement. Their destinations are unknown — the data does not include exit destination fields.</div>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <strong>The 25% vs 12.2% distinction matters</strong>
+    <p>An earlier figure of "25% reached housing" combined Groups A and B. Group B clients were already stably housed when the data begins — they didn't transition into housing, they were already there. The 12.2% (Group A) is the honest measure of the system moving people from homelessness into housing during the observation window.</p>
+  </div>
+
+  <h3>Group A: How they got there</h3>
+  <p>Of the 635 clients who transitioned into housing, 376 (59%) used Coordinated Entry as a gateway at some point before reaching housing. Services Only was the most common starting point.</p>
+
+  <div class="sankey-wrap" style="position:relative; margin-top:16px;">
+    <div class="chart-title">Group A — journey to housing (635 clients)</div>
+    <div class="chart-sub" style="margin-bottom:14px;">First program entered · gateway used · housing destination</div>
+    <div style="position:relative;">
+      <svg id="cj-svg-a" width="100%" style="display:block; overflow:visible;"></svg>
+      <div id="cj-tip"></div>
+    </div>
+    <div style="font-size:11px;color:var(--ink4);margin-top:8px;">Node labels show client count and % of Group A total</div>
+  </div>
+
+  <h3>Group B: What happens to already-housed clients</h3>
+  <div class="two-col">
+    <div>
+      <p>The 678 clients who entered the dataset already in PSH or RRH are mostly a stable population.</p>
+      <div class="outcome-row"><span class="outcome-dot" style="background:#1D9E75"></span><span class="outcome-label">Still in PH — no exit recorded</span><span class="outcome-num">412 (61%)</span></div>
+      <div class="outcome-row"><span class="outcome-dot" style="background:#5dcaa5"></span><span class="outcome-label">Exited PH, no return to homelessness</span><span class="outcome-num">304 (45%)</span></div>
+      <div class="outcome-row"><span class="outcome-dot" style="background:#C62828"></span><span class="outcome-label">Exited PH, returned to homeless programs</span><span class="outcome-num">23 (3%)</span></div>
+    </div>
+    <div>
+      <div class="callout">
+        <strong>PSH works — for those who get it</strong>
+        <p>255 of the 678 access other programs (services, case management) during their PH period — appropriate concurrent enrollment. The 3% return rate is evidence that stable housing holds. The problem is scale, not model.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Group C: The unknown 74.9%</h3>
+  <p>3,909 clients never reached PSH or RRH. Of the 3,081 who exited the system, their destinations are unknown because this dataset does not include exit destination fields. They may have resolved housing independently, moved out of county, or left while still homeless. The 828 still active are enrolled in non-housing programs with no exit recorded.</p>
+  <p>Critically: 346 of Group C clients did have a PSH or RRH enrollment at some point — they reached housing, then later re-entered non-housing programs. These represent a small but important population of housing exits followed by system re-engagement.</p>
+</section>
+
+<!-- TIME TO HOUSING -->
+<section id="housing">
+  <div class="section-label">Section 6</div>
+  <h2>Time to Permanent Housing</h2>
+  <p>Two ways to measure time-to-housing produce very different pictures. The first (Group A only) shows how long it took the clients who succeeded. The second (all clients, survival curve) shows the full population — including the 75% who never reached housing at all.</p>
+
+  <div class="two-col" style="margin-bottom:24px;">
+    <div>
+      <h3>Among clients who reached housing (Group A)</h3>
+      <table>
+        <thead><tr><th>Pathway</th><th>N</th><th>Median</th><th>Mean</th><th>90th pct</th></tr></thead>
+        <tbody>
+          <tr><td>Any PH (PSH or RRH)</td><td>635</td><td><strong>10 mo</strong></td><td>12.1 mo</td><td>25 mo</td></tr>
+          <tr><td>PSH only</td><td>459</td><td><strong>13 mo</strong></td><td>14.0 mo</td><td>26 mo</td></tr>
+          <tr><td>RRH only</td><td>252</td><td><strong>6 mo</strong></td><td>8.7 mo</td><td>20 mo</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:13px;">MH-positive clients wait 1–2 months longer on every pathway. The difference is real but modest. One quarter of PSH clients waited 21+ months. One in ten waited 26+ months — nearly two and a half years from first contact to stable housing.</p>
+    </div>
+    <div>
+      <div class="callout amber">
+        <strong>Important: these are the success cases only</strong>
+        <p>These medians describe only the 635 clients who made it. The full population picture — including those who never reached housing — looks very different. See the survival curve below.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SURVIVAL CURVE -->
+  <div class="chart-wrap">
+    <div class="chart-title">Survival curve: probability of not yet being housed</div>
+    <div class="chart-sub">All 5,222 clients included · Clients who never reached housing shown as the flat tail · Based on Kaplan-Meier method</div>
+    <div class="sv-pills" id="sv-pills" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;"></div>
+    <div class="sv-cards" id="sv-cards"></div>
+    <div class="legend">
+      <span><span class="legend-line" style="background:#6A1B9A"></span>All clients</span>
+      <span><span class="legend-line" style="background:#D84315"></span>MH-positive</span>
+      <span><span class="legend-line" style="background:#1D9E75;"></span>Non-MH</span>
+      <span style="color:var(--ink4);font-size:11px;">— dashed = Non-MH · flat tail = never housed</span>
+    </div>
+    <div style="position:relative;">
+      <svg id="sv-svg" width="100%" style="display:block;"></svg>
+    </div>
+    <div style="font-size:11px;color:var(--ink4);margin-top:8px;">The curve flattens where housing placements stop. The gap between the final value and 0% represents clients never housed during the observation window. MH-positive clients (orange) reach housing at a higher rate than non-MH (green), consistent with PSH targeting people with disabilities.</div>
+  </div>
+
+  <div class="callout coral">
+    <strong>The honest picture: ~88% of clients never reached stable housing</strong>
+    <p>At 36 months from first entry, the survival curve for all clients settles at ~79% still unhoused. The flat tail is not a slow decline — it's the structural reality of a system with far more need than PSH capacity.</p>
+  </div>
+</section>
+
+<!-- STORY ANGLES -->
+<section id="story">
+  <div class="section-label">Section 7</div>
+  <h2>Story Angles for SHCLA</h2>
+  <p>The data supports several narratives depending on audience and purpose. Each is grounded directly in the analysis above.</p>
+
+  <div class="angle-grid">
+    <div class="angle-card">
+      <div class="angle-num">Angle 1</div>
+      <div class="angle-title">The Revolving Door</div>
+      <p>The average adult touches 3.1 programs, and 57% experience both concurrent enrollment and sequential cycling at different points. The county is funding the same person across multiple programs simultaneously, month after month. PSH breaks that pattern: 81% of PSH residents are stably housed with no exits recorded. Only 3% of Group B clients ever returned to homelessness.</p>
+    </div>
+    <div class="angle-card">
+      <div class="angle-num">Angle 2</div>
+      <div class="angle-title">The Long Tab</div>
+      <p>1,353 adults have been in the system 2+ years. Emergency shelter runs ~$60–100/night. Concurrent enrollment means the county often pays three program costs for one unhoused individual. PSH at a fixed per-unit monthly cost is not an additional expense — it is a substitution for a more expensive, less effective status quo.</p>
+    </div>
+    <div class="angle-card">
+      <div class="angle-num">Angle 3</div>
+      <div class="angle-title">The Gateway Doesn't Open</div>
+      <p>Coordinated Entry moved 37 clients to PSH. It sent 393 back to Services Only and 159 to Emergency Shelter. That is a capacity problem, not a process problem. There are not enough PSH units for CE to do its job. Every person who cycles back after a CE assessment is a person the system assessed, flagged, and had nowhere to send.</p>
+    </div>
+    <div class="angle-card">
+      <div class="angle-num">Angle 4</div>
+      <div class="angle-title">Already Here</div>
+      <p>5,222 adults. 86% with a disability. 59% chronically homeless at intake. 2,451 still active today. The question is not whether this population needs long-term support — the data answers that. The question is what kind of support produces the best outcome per dollar. The survival curve shows what happens without it: 88% never reach housing.</p>
+    </div>
+    <div class="angle-card">
+      <div class="angle-num">Angle 5</div>
+      <div class="angle-title">Follow One Person</div>
+      <p>A fictionalized composite: an adult with a disability enters Coordinated Entry, moves to Emergency Shelter for 2 months, gets referred to Services Only (running concurrently with a new CE enrollment), waits on a PSH list, and lands in stable housing 14 months after first contact — touching 3+ programs, generating 3+ program costs. Month 15: still housed. One program. Stable.</p>
+    </div>
+    <div class="angle-card">
+      <div class="angle-num">Angle 6</div>
+      <div class="angle-title">Demand Is Growing</div>
+      <p>Monthly entries jumped from ~470/month in early 2024 to 600–660 by mid-2025. The system is absorbing more people, not fewer. At a moment when need is rising, the county's highest-return investment is expanding what is already proven to work — models that combine stable housing, supportive services, and community programming for adults who would otherwise remain in costly, high-churn emergency settings.</p>
+    </div>
+  </div>
+
+  <div class="data-note">
+    <strong>Data note:</strong> Source: Alameda County HMIS via UC Berkeley data request. Dataset covers adults ages 18–59, January 2023–April 2026. 621 enrollments share identical client ID, program start month, and project type — potential duplicate records. The figure of 5,222 unique individuals is based on distinct Client IDs and is considered conservative. Exit destination fields are not present in this extract, meaning the outcomes of the 3,081 "exited without housing" clients cannot be confirmed from this data alone.
+  </div>
+</section>
+
+<script>
+// ── ANIMATED HORIZ BARS ──────────────────────────────
+function animateHBars() {
+  document.querySelectorAll('.hbar-fill[data-w]').forEach(el => {
+    const w = el.dataset.w;
+    setTimeout(() => { el.style.width = w; }, 200);
+  });
+}
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) { animateHBars(); obs.disconnect(); }});
+}, {threshold: 0.2});
+document.querySelectorAll('.hbar').forEach(el => obs.observe(el));
+
+// Stay chart
+const STAY = [
+  {label:'Under 1 month', v:674, pct:13},
+  {label:'1–3 months',    v:418, pct:8},
+  {label:'3–6 months',    v:595, pct:11},
+  {label:'6–12 months',   v:966, pct:19},
+  {label:'1–2 years',     v:1216, pct:23},
+  {label:'2+ years',      v:1353, pct:26},
+];
+const stayEl = document.getElementById('stay-chart');
+STAY.forEach(d => {
+  const color = d.label.includes('year') ? '#0f6e56' : d.label.includes('12') ? '#1d9e75' : '#9a9a94';
+  stayEl.innerHTML += `<div class="hbar-row">
+    <div class="hbar-label">${d.label}</div>
+    <div class="hbar-track"><div class="hbar-fill" style="background:${color};width:0" data-w="${d.pct}%">
+      <span class="hbar-val">${d.v.toLocaleString()}</span>
+    </div></div>
+    <span class="hbar-val-out">${d.pct}%</span>
+  </div>`;
+});
+
+// Program chart
+const PROG = [
+  {label:'PSH',                   v:15, max:20, color:'#00695c'},
+  {label:'Homelessness prev.',    v:8,  max:20, color:'#1565C0'},
+  {label:'Transitional housing',  v:7.5,max:20, color:'#1565C0'},
+  {label:'Rapid re-housing',      v:6,  max:20, color:'#00838F'},
+  {label:'Coordinated entry',     v:6,  max:20, color:'#6A1B9A'},
+  {label:'Services only',         v:2,  max:20, color:'#9E6B00'},
+  {label:'Emergency shelter',     v:2,  max:20, color:'#C62828'},
+  {label:'Street outreach',       v:0,  max:20, color:'#D84315'},
+];
+const progEl = document.getElementById('prog-chart');
+PROG.forEach(d => {
+  const w = Math.max(2, (d.v/d.max)*100);
+  progEl.innerHTML += `<div class="hbar-row">
+    <div class="hbar-label">${d.label}</div>
+    <div class="hbar-track"><div class="hbar-fill" style="background:${d.color};width:0" data-w="${w}%">
+      <span class="hbar-val">${d.v}mo</span>
+    </div></div>
+  </div>`;
+});
+
+// ── NAV ACTIVE STATE ──────────────────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+const navObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+e.target.id));
+    }
+  });
+}, {rootMargin:'-40% 0px -55% 0px'});
+sections.forEach(s => navObs.observe(s));
+
+// ── FADE IN ────────────────────────────────────────────
+document.querySelectorAll('section, .group-card, .angle-card').forEach(el => {
+  el.classList.add('fade-in');
+});
+const fadeObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.05});
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+</script>
+
+<script>
+// ── TRANSITIONS SANKEY ─────────────────────────────────
+(function(){
+const RAW = [
+  {s:"Services only",t:"Coordinated entry",v:837},{s:"Coordinated entry",t:"Services only",v:393},
+  {s:"Services only",t:"Emergency shelter",v:322},{s:"Emergency shelter",t:"Services only",v:290},
+  {s:"Street outreach",t:"Services only",v:267},{s:"Street outreach",t:"Emergency shelter",v:152},
+  {s:"Street outreach",t:"Coordinated entry",v:176},{s:"Coordinated entry",t:"Emergency shelter",v:159},
+  {s:"Emergency shelter",t:"Coordinated entry",v:104},{s:"Services only",t:"Street outreach",v:198},
+  {s:"Coordinated entry",t:"Street outreach",v:106},{s:"Day shelter",t:"Emergency shelter",v:41},
+  {s:"Emergency shelter",t:"Day shelter",v:39},{s:"Services only",t:"PSH",v:114},
+  {s:"Emergency shelter",t:"PSH",v:43},{s:"Coordinated entry",t:"PSH",v:37},
+  {s:"Coordinated entry",t:"Rapid re-housing",v:43},{s:"Emergency shelter",t:"Rapid re-housing",v:41},
+  {s:"Street outreach",t:"Rapid re-housing",v:14},{s:"Services only",t:"Transitional housing",v:38},
+  {s:"Coordinated entry",t:"Transitional housing",v:35}
+];
+const EXIT = new Set(["PSH","Rapid re-housing","Transitional housing"]);
+const COLORS = {"Street outreach":"#D84315","Day shelter":"#E65100","Emergency shelter":"#C62828","Services only":"#9E6B00","Coordinated entry":"#6A1B9A","Transitional housing":"#1565C0","Rapid re-housing":"#00838F","PSH":"#00695C"};
+const FILTERS = [{label:"All flows",fn:()=>true},{label:"Into PSH",fn:d=>d.t==="PSH"},{label:"Into RRH",fn:d=>d.t==="Rapid re-housing"},{label:"Churn only",fn:d=>!EXIT.has(d.t)}];
+let active=0;
+FILTERS.forEach((f,i)=>{
+  const el=document.createElement('div');el.className='skp'+(i===0?' on':'');el.textContent=f.label;
+  el.style.color=["var(--ink3)","#00695C","#00838F","#9E6B00"][i];
+  el.onclick=()=>{active=i;document.querySelectorAll('.skp').forEach((p,j)=>p.classList.toggle('on',j===i));drawSK();};
+  document.getElementById('sk-pills').appendChild(el);
+});
+function drawSK(){
+  const data=RAW.filter(FILTERS[active].fn);
+  const total=data.reduce((s,d)=>s+d.v,0);
+  const exitV=data.filter(d=>EXIT.has(d.t)).reduce((s,d)=>s+d.v,0);
+  const churnV=data.filter(d=>!EXIT.has(d.t)).reduce((s,d)=>s+d.v,0);
+  const ep=total>0?Math.round(exitV/total*100):0,cp=total>0?Math.round(churnV/total*100):0;
+  document.getElementById('sk-stats').innerHTML=
+    `<div class="skm"><b>${total.toLocaleString()}</b><span>Transitions</span></div>
+     <div class="skm"><b>${exitV.toLocaleString()}<span class="pct">${ep}%</span></b><span>To stable housing</span></div>
+     <div class="skm"><b>${ep}%</b><span>Exit rate</span></div>
+     <div class="skm"><b>${churnV.toLocaleString()}<span class="pct">${cp}%</span></b><span>Churn</span></div>`;
+  const svgEl=document.getElementById('sk-svg');
+  const W=Math.max(480,svgEl.getBoundingClientRect().width||640);
+  const srcN=[...new Set(data.map(d=>d.s))].sort(),tgtN=[...new Set(data.map(d=>d.t))].sort();
+  const nodeList=[];const nIdx={};
+  srcN.forEach(n=>{nIdx['s:'+n]=nodeList.length;nodeList.push({id:'s:'+n,label:n,side:'src'});});
+  tgtN.forEach(n=>{nIdx['t:'+n]=nodeList.length;nodeList.push({id:'t:'+n,label:n,side:'tgt'});});
+  const links=data.map(d=>({source:nIdx['s:'+d.s],target:nIdx['t:'+d.t],value:d.v,orig:d}));
+  const nRows=Math.max(srcN.length,tgtN.length);
+  const H=Math.max(400,nRows*62+60);const LM=174,RM=182;
+  d3.select(svgEl).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove();
+  const svg=d3.select(svgEl);
+  const sk=d3.sankey().nodeId(d=>d.index).nodeWidth(16).nodePadding(18).nodeSort(null)
+    .extent([[LM,28],[W-RM,H-16]]);
+  const{nodes,links:slinks}=sk({nodes:nodeList.map((d,i)=>({...d,index:i})),links:links.map(d=>({...d}))});
+  const tip=document.getElementById('sk-tip');
+  const gr=()=>svgEl.getBoundingClientRect();
+  slinks.forEach(l=>{
+    const col=COLORS[l.orig.s]||'#888';
+    const isE=EXIT.has(l.orig.t);
+    const rc=isE?'#1D9E75':col;
+    const bo=isE?.42:.22,ho=isE?.70:.52;
+    const ps=total>0?Math.round(l.orig.v/total*100)+'%':'';
+    svg.append('path').datum(l).attr('fill','none').attr('d',d3.sankeyLinkHorizontal())
+      .attr('stroke',rc).attr('stroke-width',Math.max(2,l.width)).attr('opacity',bo).style('cursor','pointer')
+      .on('mouseenter',function(ev){d3.select(this).attr('opacity',ho);tip.style.display='block';
+        tip.innerHTML=`<strong>${l.orig.s} → ${l.orig.t}</strong><br>${l.orig.v.toLocaleString()} · ${ps}`;
+        const r=gr();tip.style.left=(ev.clientX-r.left+14)+'px';tip.style.top=(ev.clientY-r.top-14)+'px';})
+      .on('mousemove',function(ev){const r=gr();tip.style.left=(ev.clientX-r.left+14)+'px';tip.style.top=(ev.clientY-r.top-14)+'px';})
+      .on('mouseleave',function(){d3.select(this).attr('opacity',bo);tip.style.display='none';});
+  });
+  nodes.forEach(n=>{
+    const col=COLORS[n.label]||'#888';const h=Math.max(4,n.y1-n.y0);const cy=n.y0+h/2;
+    const isL=n.side==='src';const tx=isL?n.x0-10:n.x1+10;const an=isL?'end':'start';
+    const pp=total>0?' ('+Math.round(n.value/total*100)+'%)':'';
+    svg.append('rect').attr('x',n.x0).attr('y',n.y0).attr('width',n.x1-n.x0).attr('height',h).attr('rx',3).attr('fill',col).attr('opacity',0.9);
+    svg.append('text').attr('x',tx).attr('y',cy-7).attr('text-anchor',an).attr('dominant-baseline','central').attr('font-size',13).attr('font-weight',500).attr('fill','var(--ink)').text(n.label);
+    svg.append('text').attr('x',tx).attr('y',cy+9).attr('text-anchor',an).attr('dominant-baseline','central').attr('font-size',11).attr('fill','var(--ink4)').text(n.value.toLocaleString()+pp);
+  });
+  svg.append('text').attr('x',LM).attr('y',14).attr('font-size',11).attr('font-weight',600).attr('fill','var(--ink4)').text('FROM');
+  svg.append('text').attr('x',W-RM).attr('y',14).attr('text-anchor','end').attr('font-size',11).attr('font-weight',600).attr('fill','var(--ink4)').text('TO');
+}
+drawSK();
+window.addEventListener('resize',drawSK);
+})();
+</script>
+
+<script>
+// ── GROUP A JOURNEY SANKEY ─────────────────────────────
+(function(){
+const LINKS=[{s:"Services only",t:"Via coordinated entry",v:147},{s:"Services only",t:"Direct to housing",v:128},{s:"Coordinated entry",t:"Via coordinated entry",v:124},{s:"Emergency shelter",t:"Via coordinated entry",v:58},{s:"Emergency shelter",t:"Direct to housing",v:69},{s:"Via coordinated entry",t:"PSH",v:233},{s:"Via coordinated entry",t:"Rapid re-housing",v:143},{s:"Direct to housing",t:"PSH",v:161},{s:"Direct to housing",t:"Rapid re-housing",v:98},{s:"Street outreach",t:"Via coordinated entry",v:34},{s:"Street outreach",t:"Direct to housing",v:23},{s:"Transitional housing",t:"Via coordinated entry",v:7},{s:"Transitional housing",t:"Direct to housing",v:20},{s:"Safe haven",t:"Via coordinated entry",v:3},{s:"Safe haven",t:"Direct to housing",v:5},{s:"Other",t:"Direct to housing",v:13}];
+const COLORS={"Services only":"#9E6B00","Coordinated entry":"#6A1B9A","Emergency shelter":"#C62828","Street outreach":"#D84315","Transitional housing":"#1565C0","Safe haven":"#4A148C","Other":"#888780","Via coordinated entry":"#6A1B9A","Direct to housing":"#1D9E75","PSH":"#00695C","Rapid re-housing":"#00838F"};
+function drawCJ(){
+  const total=LINKS.reduce((s,l)=>s+l.v,0);
+  const svgEl=document.getElementById('cj-svg-a');
+  const W=Math.max(480,svgEl.getBoundingClientRect().width||640);
+  const names=[...new Set(LINKS.flatMap(l=>[l.s,l.t]))];
+  const idx=Object.fromEntries(names.map((n,i)=>[n,i]));
+  const slinks=LINKS.map(l=>({source:idx[l.s],target:idx[l.t],value:l.v,orig:l}));
+  const nodes=names.map((n,i)=>({id:n,index:i}));
+  const H=Math.max(360,8*60+60);const LM=174,RM=170;
+  d3.select(svgEl).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove();
+  const svg=d3.select(svgEl);
+  const sk=d3.sankey().nodeId(d=>d.index).nodeWidth(14).nodePadding(14).nodeSort(null)
+    .extent([[LM,28],[W-RM,H-16]]);
+  const{nodes:sn,links:sl}=sk({nodes:nodes.map((d,i)=>({...d,index:i})),links:slinks.map(d=>({...d}))});
+  const tip=document.getElementById('cj-tip');
+  const gr=()=>svgEl.getBoundingClientRect();
+  sl.forEach(l=>{
+    const col=COLORS[l.orig.s]||'#888';
+    const isH=['PSH','Rapid re-housing'].includes(l.orig.t);
+    const tc=COLORS[l.orig.t]||col;
+    const uc=isH?tc:col;
+    const bo=isH?.45:.22;
+    svg.append('path').datum(l).attr('fill','none').attr('d',d3.sankeyLinkHorizontal())
+      .attr('stroke',uc).attr('stroke-width',Math.max(1.5,l.width)).attr('opacity',bo).style('cursor','pointer')
+      .on('mouseenter',function(ev){d3.select(this).attr('opacity',Math.min(bo+0.3,.8));tip.style.display='block';
+        const p=Math.round(l.orig.v/total*100);
+        tip.innerHTML=`<strong>${l.orig.s} → ${l.orig.t}</strong><br>${l.orig.v} clients (${p}%)`;
+        const r=gr();tip.style.left=(ev.clientX-r.left+14)+'px';tip.style.top=(ev.clientY-r.top-14)+'px';})
+      .on('mousemove',function(ev){const r=gr();tip.style.left=(ev.clientX-r.left+14)+'px';tip.style.top=(ev.clientY-r.top-14)+'px';})
+      .on('mouseleave',function(){d3.select(this).attr('opacity',bo);tip.style.display='none';});
+  });
+  sn.forEach(n=>{
+    const col=COLORS[n.id]||'#888';const h=Math.max(4,n.y1-n.y0);const cy=n.y0+h/2;
+    const isL=n.x0<W/2;const tx=isL?n.x0-10:n.x1+10;const an=isL?'end':'start';
+    const pp=Math.round(n.value/total*100)+'%';
+    svg.append('rect').attr('x',n.x0).attr('y',n.y0).attr('width',n.x1-n.x0).attr('height',h).attr('rx',3).attr('fill',col).attr('opacity',0.9);
+    svg.append('text').attr('x',tx).attr('y',cy-7).attr('text-anchor',an).attr('dominant-baseline','central').attr('font-size',13).attr('font-weight',500).attr('fill','var(--ink)').text(n.id);
+    svg.append('text').attr('x',tx).attr('y',cy+9).attr('text-anchor',an).attr('dominant-baseline','central').attr('font-size',11).attr('fill','var(--ink4)').text(n.value+' ('+pp+')');
+  });
+  svg.append('text').attr('x',LM).attr('y',14).attr('font-size',11).attr('font-weight',600).attr('fill','var(--ink4)').text('FIRST PROGRAM');
+  svg.append('text').attr('x',W-RM).attr('y',14).attr('text-anchor','end').attr('font-size',11).attr('font-weight',600).attr('fill','var(--ink4)').text('HOUSING DESTINATION');
+}
+drawCJ();
+window.addEventListener('resize',drawCJ);
+})();
+</script>
+
+<script>
+// ── SURVIVAL CURVES ────────────────────────────────────
+(function(){
+const DATA={
+  any_ph:{
+    all:{km:[[0,1.0],[1,0.9904],[2,0.983],[3,0.9751],[4,0.969],[5,0.9624],[6,0.9545],[7,0.9454],[8,0.9378],[9,0.9315],[10,0.9252],[11,0.9193],[12,0.9127],[13,0.9068],[14,0.9014],[15,0.8954],[16,0.8891],[17,0.88],[18,0.8745],[19,0.8663],[20,0.8587],[21,0.8526],[22,0.8462],[23,0.8386],[24,0.8307],[25,0.8265],[26,0.8196],[27,0.8151],[28,0.8099],[29,0.8057],[30,0.8038],[31,0.8005],[32,0.7978],[33,0.7943],[34,0.7935],[35,0.7919],[36,0.7919]],n_total:5222,n_events:635,pct_housed:12.2},
+    mh:{km:[[0,1.0],[1,0.9889],[2,0.9827],[3,0.9734],[4,0.9672],[5,0.96],[6,0.9497],[7,0.9385],[8,0.9286],[9,0.9215],[10,0.9136],[11,0.9078],[12,0.8997],[13,0.8922],[14,0.8857],[15,0.8783],[16,0.8712],[17,0.8608],[18,0.8538],[19,0.8426],[20,0.8344],[21,0.8259],[22,0.8177],[23,0.8077],[24,0.7955],[25,0.7897],[26,0.78],[27,0.7736],[28,0.7669],[29,0.7619],[30,0.7588],[31,0.7533],[32,0.751],[33,0.7449],[34,0.7436],[35,0.7422],[36,0.7422]],n_total:2975,n_events:463,pct_housed:15.6},
+    non_mh:{km:[[0,1.0],[1,0.9924],[2,0.9834],[3,0.9773],[4,0.9715],[5,0.9658],[6,0.9616],[7,0.9558],[8,0.9517],[9,0.9467],[10,0.943],[11,0.9369],[12,0.9328],[13,0.9294],[14,0.9258],[15,0.9221],[16,0.9173],[17,0.9102],[18,0.9071],[19,0.9038],[20,0.8972],[21,0.8949],[22,0.8914],[23,0.8877],[24,0.8864],[25,0.8851],[26,0.8823],[27,0.8809],[28,0.8779],[29,0.8749],[32,0.8718],[35,0.8702],[36,0.8702]],n_total:2247,n_events:172,pct_housed:7.7}
+  },
+  psh:{
+    all:{km:[[0,1.0],[1,0.9958],[2,0.9936],[3,0.9882],[4,0.9834],[5,0.9797],[6,0.9757],[7,0.9699],[8,0.9649],[9,0.96],[10,0.9551],[11,0.9501],[12,0.9457],[13,0.9414],[14,0.938],[15,0.9328],[16,0.9265],[17,0.9188],[18,0.9149],[19,0.9074],[20,0.9002],[21,0.8949],[22,0.8884],[23,0.8817],[24,0.8726],[25,0.8695],[26,0.864],[27,0.8595],[28,0.8547],[29,0.8504],[30,0.8491],[31,0.8451],[32,0.8423],[33,0.8386],[34,0.8378],[35,0.8362],[36,0.8362]],n_total:5222,n_events:459,pct_housed:8.8},
+    mh:{km:[[0,1.0],[1,0.9946],[2,0.9918],[3,0.9847],[4,0.98],[5,0.9754],[6,0.9699],[7,0.9624],[8,0.9551],[9,0.9489],[10,0.9419],[11,0.9356],[12,0.9296],[13,0.9248],[14,0.9204],[15,0.9142],[16,0.9071],[17,0.8979],[18,0.8928],[19,0.8816],[20,0.8726],[21,0.8662],[22,0.8579],[23,0.8486],[24,0.8355],[25,0.8313],[26,0.8242],[27,0.8177],[28,0.8109],[29,0.8058],[30,0.8037],[31,0.7981],[32,0.7945],[33,0.7882],[34,0.7869],[35,0.7854],[36,0.7854]],n_total:2975,n_events:362,pct_housed:12.2},
+    non_mh:{km:[[0,1.0],[1,0.9973],[2,0.9959],[3,0.9929],[4,0.9881],[5,0.9858],[6,0.984],[7,0.9808],[8,0.9794],[9,0.9766],[10,0.9751],[11,0.972],[12,0.9704],[13,0.967],[14,0.9652],[15,0.9614],[16,0.9566],[17,0.9515],[18,0.9494],[19,0.9483],[20,0.9438],[21,0.9403],[22,0.9367],[23,0.9342],[24,0.9316],[25,0.9302],[26,0.9274],[27,0.9259],[28,0.9244],[29,0.9212],[31,0.9196],[32,0.918],[35,0.9163],[36,0.9163]],n_total:2247,n_events:97,pct_housed:4.3}
+  },
+  rrh:{
+    all:{km:[[0,1.0],[1,0.9931],[2,0.9871],[3,0.9831],[4,0.9805],[5,0.9771],[6,0.9726],[7,0.9685],[8,0.9649],[9,0.9627],[10,0.9607],[11,0.9586],[12,0.9562],[13,0.9539],[14,0.9515],[15,0.9501],[16,0.9487],[17,0.9456],[18,0.9441],[19,0.9429],[20,0.9412],[21,0.9391],[22,0.9382],[23,0.9363],[24,0.9358],[25,0.9348],[26,0.9332],[28,0.9326],[29,0.9321],[30,0.9315],[31,0.9308],[32,0.9289],[33,0.9275],[36,0.9275]],n_total:5222,n_events:258,pct_housed:4.9},
+    mh:{km:[[0,1.0],[1,0.9936],[2,0.9891],[3,0.9852],[4,0.983],[5,0.9796],[6,0.9741],[7,0.9699],[8,0.9661],[9,0.9647],[10,0.9634],[11,0.9629],[12,0.9604],[13,0.9572],[14,0.9545],[15,0.9528],[16,0.9516],[17,0.9492],[18,0.9473],[19,0.9467],[20,0.9454],[21,0.9419],[22,0.9404],[23,0.9382],[24,0.9374],[25,0.9357],[26,0.9332],[29,0.9323],[30,0.9313],[31,0.9303],[32,0.9283],[33,0.9261],[36,0.9261]],n_total:2975,n_events:152,pct_housed:5.1},
+    non_mh:{km:[[0,1.0],[1,0.9924],[2,0.9843],[3,0.9803],[4,0.9771],[5,0.9737],[6,0.9707],[7,0.9668],[8,0.9634],[9,0.9599],[10,0.957],[11,0.9523],[12,0.9499],[13,0.9491],[14,0.9473],[15,0.9464],[16,0.9444],[17,0.9404],[18,0.9394],[19,0.9373],[20,0.935],[23,0.9339],[28,0.9327],[32,0.9315],[36,0.9315]],n_total:2247,n_events:106,pct_housed:4.7}
+  }
+};
+const VIEWS=[{key:'any_ph',label:'Any PH (PSH or RRH)'},{key:'psh',label:'PSH only'},{key:'rrh',label:'RRH only'}];
+let activeV=0;
+const pillsEl=document.getElementById('sv-pills');
+VIEWS.forEach((v,i)=>{
+  const el=document.createElement('div');el.className='skp'+(i===0?' on':'');el.textContent=v.label;
+  el.onclick=()=>{activeV=i;document.querySelectorAll('#sv-pills .skp').forEach((p,j)=>p.classList.toggle('on',j===i));drawSV();};
+  pillsEl.appendChild(el);
+});
+function drawSV(){
+  const v=VIEWS[activeV];const d=DATA[v.key];
+  const GRPS=[{key:'all',color:'#6A1B9A',label:'All'},{key:'mh',color:'#D84315',label:'MH-positive'},{key:'non_mh',color:'#1D9E75',label:'Non-MH'}];
+  document.getElementById('sv-cards').innerHTML=GRPS.map(g=>{
+    const info=d[g.key];const fs=Math.round((1-info.pct_housed/100)*100);
+    return `<div class="sv-card" style="background:${g.color}12;border:1px solid ${g.color}40">
+      <b style="color:${g.color}">${info.pct_housed}% housed</b>
+      <span style="color:var(--ink3)">${g.label} · N=${info.n_total.toLocaleString()}</span>
+      <div class="sub" style="color:var(--ink4)">${info.n_events.toLocaleString()} reached ${v.key==='rrh'?'RRH':'PSH'} · ${fs}% never did</div>
+    </div>`;
+  }).join('');
+  const svgEl=document.getElementById('sv-svg');
+  const W=Math.max(400,svgEl.getBoundingClientRect().width||640);
+  const H=300;const ml=52,mr=32,mt=16,mb=44;const cw=W-ml-mr,ch=H-mt-mb;
+  d3.select(svgEl).attr('height',H).attr('viewBox',`0 0 ${W} ${H}`).selectAll('*').remove();
+  const svg=d3.select(svgEl);
+  const g=svg.append('g').attr('transform',`translate(${ml},${mt})`);
+  const maxT=36;
+  const x=d3.scaleLinear().domain([0,maxT]).range([0,cw]);
+  const y=d3.scaleLinear().domain([0,1]).range([ch,0]);
+  [0.25,0.5,0.75].forEach(lv=>{
+    g.append('line').attr('x1',0).attr('x2',cw).attr('y1',y(lv)).attr('y2',y(lv))
+      .attr('stroke','#e4e2da').attr('stroke-width',0.5).attr('stroke-dasharray','3 3');
+    g.append('text').attr('x',cw+4).attr('y',y(lv)+4).attr('font-size',10).attr('fill','var(--ink4)').text(Math.round(lv*100)+'%');
+  });
+  g.append('g').attr('transform',`translate(0,${ch})`).call(d3.axisBottom(x).tickValues([0,6,12,18,24,30,36]).tickSize(3).tickFormat(d=>d===0?'0':d+'mo')).call(ax=>ax.select('.domain').attr('stroke','#e4e2da')).call(ax=>ax.selectAll('text').attr('font-size',11).attr('fill','var(--ink4)')).call(ax=>ax.selectAll('line').attr('stroke','#e4e2da'));
+  g.append('g').call(d3.axisLeft(y).ticks(4).tickSize(3).tickFormat(d=>Math.round(d*100)+'%')).call(ax=>ax.select('.domain').attr('stroke','#e4e2da')).call(ax=>ax.selectAll('text').attr('font-size',11).attr('fill','var(--ink4)')).call(ax=>ax.selectAll('line').attr('stroke','#e4e2da'));
+  g.append('text').attr('x',cw/2).attr('y',ch+36).attr('text-anchor','middle').attr('font-size',12).attr('fill','var(--ink3)').text('Months since first system entry');
+  g.append('text').attr('transform','rotate(-90)').attr('x',-ch/2).attr('y',-40).attr('text-anchor','middle').attr('font-size',12).attr('fill','var(--ink3)').text('% not yet housed');
+  GRPS.forEach((grp,gi)=>{
+    const km=d[grp.key].km.filter(p=>p[0]<=maxT);
+    const last=km[km.length-1];if(last[0]<maxT)km.push([maxT,last[1]]);
+    const steps=[];for(let i=0;i<km.length-1;i++){steps.push([km[i][0],km[i][1]]);steps.push([km[i+1][0],km[i][1]]);}steps.push([km[km.length-1][0],km[km.length-1][1]]);
+    g.append('path').datum(steps).attr('fill','none')
+      .attr('stroke',grp.color).attr('stroke-width',2.5)
+      .attr('stroke-dasharray',gi===2?'5 3':'none').attr('opacity',.88)
+      .attr('d',d3.line().x(d=>x(d[0])).y(d=>y(d[1])));
+    const fy=km[km.length-1][1];
+    g.append('text').attr('x',x(maxT)+4).attr('y',y(fy)+4).attr('font-size',10).attr('font-weight',600).attr('fill',grp.color).text(Math.round(fy*100)+'%');
+  });
+}
+drawSV();
+window.addEventListener('resize',drawSV);
+})();
+</script>
+
+</body>
+</html>
