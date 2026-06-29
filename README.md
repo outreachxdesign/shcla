@@ -31,7 +31,6 @@ The landing page (`index.html`) links to every tool. The links below point to th
 | Oakland Community Need Map | `/neighborhood/community-need-map/` | Oakland_Blockgroups.html |
 | Oakland Block Groups Explorer | `/neighborhood/block-groups/` | Oakland_neighborhood_comparison.html |
 
-> Note: `Neighborhood_Choice.html` was identical to `Full_Story.html`, so only one copy is included. A stray `SHCLA_TOC_Model_Interactive.html` duplicated `TOC_Model_Interactive.html` and was not included.
 
 ---
 
