@@ -19,6 +19,7 @@ The landing page (`index.html`) links to every tool. The links below point to th
 ### The Population — who SHCLA serves
 | Tool | Live link | Source file shared |
 | --- | --- | --- |
+| Behind Every Number, a Person Without a Home | `/population/behind-every-number/` | Behind_Every_Number.html |
 | CHIS Data Explorer | `/population/chis-explorer/` | CHIS_Explorer.html |
 | HMIS Data Explorer | `/population/hmis-explorer/` | HMIS_Explorer.html |
 | Adults in the Homelessness System | `/population/hmis-analysis/` | HMIS_Analysis.html |
@@ -46,6 +47,7 @@ Each tool lives in its own folder as `index.html`, so its URL is the clean folde
 │   ├── system-comparison/index.html
 │   └── marcus-path/index.html
 ├── population/
+│   ├── behind-every-number/index.html
 │   ├── chis-explorer/index.html
 │   ├── hmis-explorer/index.html
 │   └── hmis-analysis/index.html
@@ -65,11 +67,11 @@ Replace the `index.html` inside the relevant folder with the new version (same f
 
 **Internet connection required.** Every tool loads its fonts from Google Fonts. A few load mapping or charting libraries from public CDNs (Leaflet for the maps, D3 for the homelessness-system flow diagram). The pages will not look right offline.
 
-**Some maps pull live public data at view time.** *A Neighborhood Worth Choosing* and *Oakland Community Need Map* query free OpenStreetMap services (Overpass and Nominatim) when they load. They work without any key, but if a map is slow or a layer is briefly missing, that is the public service rate-limiting, not the page. For a guaranteed-fast version, the queried data could be saved into the file instead of fetched live (a later enhancement, not required to publish).
+**Some maps pull live public data at view time.** *A Neighborhood Worth Choosing* and *Oakland Community Need Map* query free OpenStreetMap services (Overpass and Nominatim) when they load. They work without any key, but if a map is slow or a layer is briefly missing, that is the public service rate-limiting, not the page. For a guaranteed-fast version, the queried data could be saved into the file instead of fetched live as a future enhancement.
 
-**Data is aggregate and de-identified.** The CHIS tools use published survey indicators. The HMIS tools use aggregate counts of distinct individuals from a UC Berkeley data request (adults 18–59, Jan 2023–Apr 2026); no person-level records are embedded. This is what makes the repository safe to publish publicly.
+**Data is aggregate and de-identified.** The CHIS tools use published survey indicators. The HMIS tools use aggregate counts of distinct individuals from a UC Berkeley data request (adults 18–59, Jan 2023–Apr 2026); no person-level records are embedded.
 
-**Brand pass pending.** The landing page uses a palette drawn from the existing tools as a neutral starting point. Final OBD and SHCLA brand colors, logos, and typography are applied in a separate pass.
+**Brand pass pending.** The landing page uses a palette drawn from the existing tools as a neutral starting point. SHCLA may update brand colors, logos, and typography in a future revision.
 
 ---
 
